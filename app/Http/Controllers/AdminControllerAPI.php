@@ -105,5 +105,46 @@ class AdminControllerAPI extends Controller
         }
     }
 
+    public function addproduct(Request $req){
+        $name = $req->input('product_name');
+        $quantity = $req->input('product_quantity');
+        $cat_id = $req->input('cat_id');
+
+        if(empty($name) || empty($quantity) ||empty($cat_id)){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'message' => "Arguments must be provided."
+            ]);
+        }else {
+            if($req->hasFile('image')){
+                $file = $req->file('image');
+                $product_image_name = Date().time().$quantity.$cat_id;
+                $path = "./uploads/products/";
+
+                if($file->move($path,$product_image_name)){
+                    $product = new Pd();
+                    $product->product_name = $name;
+                    $product->quantity = $quantity;
+                    $product->cat_id = $cat_id;
+                    $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
+                }else {
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => true,
+                        'message' => "Error occurred in uploading the image. Please try again."
+                    ]);
+                }
+
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => true,
+                    'message' => "Product Image must be provided."
+                ]);
+            }
+        }
+    }
+
 
 }

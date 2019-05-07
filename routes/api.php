@@ -26,6 +26,8 @@ Route::group(['prefix' => 'auth','middleware' => 'APIAdminWare'],function(){
 Route::post('/addcat','AdminControllerAPI@addCategory');
 Route::get('/getCategories','AdminControllerAPI@getCategories');
 Route::get('/getproducts','AdminControllerAPI@getProducts');
+Route::post('addproduct','AdminControllerAPI@addproduct');
+
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
