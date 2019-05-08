@@ -108,6 +108,7 @@ class AdminControllerAPI extends Controller
     public function addproduct(Request $req){
         $name = $req->input('product_name');
         $quantity = $req->input('product_quantity');
+        $price = $req->input('product_price');
         $cat_id = $req->input('cat_id');
 
         if(empty($name) || empty($quantity) ||empty($cat_id)){
@@ -119,15 +120,34 @@ class AdminControllerAPI extends Controller
         }else {
             if($req->hasFile('image')){
                 $file = $req->file('image');
-                $product_image_name = Date().time().$quantity.$cat_id;
+                $extension = $file->getClientOriginalExtension();
+                $product_image_name = time().$quantity.$cat_id.rand(0,10000).".".$extension;
                 $path = "./uploads/products/";
 
                 if($file->move($path,$product_image_name)){
                     $product = new Pd();
                     $product->product_name = $name;
                     $product->quantity = $quantity;
+                    $product->available = $quantity;
+                    $product->sold = 0;
+                    $product->product_price = $price;
                     $product->cat_id = $cat_id;
                     $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
+
+                    if($product->save()){
+                        return response()->json([
+                            'isAuthenticated' => true,
+                            'isError' => false,
+                            'isSaved' => true,
+                            'message' => "Product Added."
+                        ]);
+                    }else {
+                        return response()->json([
+                            'isAuthenticated' => true,
+                            'isError' => true,
+                            'message' => "Error occurred in saving the uploaded image. Please try again."
+                        ]);
+                    }
                 }else {
                     return response()->json([
                         'isAuthenticated' => true,
@@ -143,6 +163,61 @@ class AdminControllerAPI extends Controller
                     'message' => "Product Image must be provided."
                 ]);
             }
+        }
+    }
+
+    public function getProduct(Request $req){
+        $product_id = $req->input('product_id');
+        $product = Pd::where(['product_id' => $product_id]);
+        if($product->count() > 0){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => false,
+                'isFound' => true,
+                'product' => $product->first()
+            ]);
+        }else {
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => "No such Product exists in the system."
+            ]);
+        }
+    }
+
+    public function deleteproduct(Request $req){
+        $product_id = $req->input('product_id');
+
+        $product = Pd::where(['product_id' => $product_id]);
+        if($product->count() > 0){
+
+            if($product->first()->delete()){
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isFound' => true,
+                    'isDeleted' => true,
+                    'message' => 'product deleted.'
+                ]);
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => true,
+                    'isFound' => true,
+                    'isDeleted' => false,
+                    'message' => 'Error occurred in deleting the product. Try again.'
+                ]);
+            }
+
+
+        }else {
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => "No such Product exists in the system."
+            ]);
         }
     }
 

@@ -24,8 +24,12 @@ Route::post('nigol','UserControllerAPI@login');
 Route::group(['prefix' => 'auth','middleware' => 'APIAdminWare'],function(){
 //Route::post('login')
 Route::post('/addcat','AdminControllerAPI@addCategory');
+
 Route::get('/getCategories','AdminControllerAPI@getCategories');
 Route::get('/getproducts','AdminControllerAPI@getProducts');
+Route::get('/getproduct','AdminControllerAPI@getProduct');
+Route::get('/deleteproduct','AdminControllerAPI@deleteproduct');
+
 Route::post('addproduct','AdminControllerAPI@addproduct');
 
 });
