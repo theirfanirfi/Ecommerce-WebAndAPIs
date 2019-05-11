@@ -13,9 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/',function(){
-echo "working";
-})->middleware('APIWare');
+// Route::get('/',function(){
+// echo "working";
+// })->middleware('APIWare');
 
 //routes for admin login
 
@@ -33,6 +33,8 @@ Route::get('/deleteproduct','AdminControllerAPI@deleteproduct');
 Route::post('addproduct','AdminControllerAPI@addproduct');
 
 });
+
+
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
