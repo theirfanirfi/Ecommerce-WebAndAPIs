@@ -4,7 +4,7 @@
                     <div class="col-xs-12 col-sm-12 col-md-3 logo-holder">
                         <!-- ============================================================= LOGO ============================================================= -->
                         <div class="logo">
-                            <a href="index.html">
+                            <a href="{{ route('home') }}">
                                 <!--<img alt="logo" src="assets/images/logo.svg" width="233" height="54"/>-->
                                 <!--<object id="sp" type="image/svg+xml" data="assets/images/logo.svg" width="233" height="54"></object>-->
                                 <svg width="233px" height="54px" viewBox="0 0 233 54" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -43,26 +43,20 @@
                         </div><!-- /.contact-row -->
                         <!-- ============================================================= SEARCH AREA ============================================================= -->
                         <div class="search-area">
-                            <form>
+                            <form action="{{ route('search') }}" method="get">
                                 <div class="control-group">
-                                    <input class="search-field" placeholder="Search for item" />
+                                    <input class="search-field" placeholder="Search for item" name="product_name" />
 
-                                    <ul class="categories-filter animate-dropdown">
-                                        <li class="dropdown">
+                                    <select class="categories-filter animate-dropdown" style="padding:8px; border:none;" role="menu" name="cat_id">
+                                        <option value="all">All Categories</option>
+                                            @foreach ($cats as $c )
+                                            <option value="{{ $c->cat_id }}">{{ $c->cat_title }}</option>
 
-                                            <a class="dropdown-toggle"  data-toggle="dropdown" href="category-grid.html">all categories</a>
+                                            @endforeach
 
-                                            <ul class="dropdown-menu" role="menu" >
-                                                @foreach ($cats as $c )
-                                                <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ route('category',['id' => $c->cat_id]) }}">{{ $c->cat_title }}</a></li>
+                                    </select>
 
-                                                @endforeach
-
-                                            </ul>
-                                        </li>
-                                    </ul>
-
-                                    <a class="search-button" href="#" ></a>
+                                    <button type="submit" class="search-button" style="border:none;"></button>
 
                                 </div>
                             </form>
@@ -74,16 +68,16 @@
                         <div class="top-cart-row-container">
                             <div class="wishlist-compare-holder">
                                 <div class="wishlist ">
-                                    <a href="#"><i class="fa fa-heart"></i> wishlist <span class="value">@if(Auth::check()) {{ Session('wishlist') }} @else 0 @endif</span> </a>
+                                    <a href="{{ route('wishlist') }}">@if(Session()->has('wl') && Session()->get('wl') > 0)<i style="color:red;" class="fa fa-heart">@else <i class="fa fa-heart"> @endif</i> wishlist <span class="value">(@if(Auth::check() && Session()->has('wl')) {{ Session('wl') }} @else 0 @endif)</span> </a>
                                 </div>
                             </div>
 
                             <!-- ============================================================= SHOPPING CART DROPDOWN ============================================================= -->
                             <div class="top-cart-holder dropdown animate-dropdown">
                                 <div class="basket">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="{{ route('cart') }}">
                                         <div class="basket-item-count">
-                                            <span class="count"><?php if(Session()->has('cart')){ $arr = Session()->get('cart'); echo count($arr); } else { echo "0"; } ?></span>
+                                            <span class="count"><?php if(Session()->has('cart')){ $arr = Session()->get('cart'); echo $arr['num']; } else { echo "0"; } ?></span>
                                             <img src="{{ URL::asset('images/icon-cart.png') }}" alt="" />
                                         </div>
 

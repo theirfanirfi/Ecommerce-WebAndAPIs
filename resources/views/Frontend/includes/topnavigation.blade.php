@@ -60,9 +60,12 @@
 
                     <div class="col-xs-12 col-sm-6 no-margin">
                         <ul class="right">
-
-                            <li><a href="authentication.html">Register</a></li>
-                            <li><a href="authentication.html">Login</a></li>
+                            @if(!Auth::check())
+                            <li><a href="{{ route('login') }}">Register</a></li>
+                            <li><a href="{{ route('login') }}">Login</a></li>
+                            @else
+                            <li><a href="{{ route('logout') }}">Logout</a></li>
+                            @endif
                         </ul>
                     </div><!-- /.col -->
                 </div><!-- /.container -->

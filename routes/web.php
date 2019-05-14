@@ -15,6 +15,10 @@
 //     return view('welcome');
 // });
 
+Route::get('login','AuthController@login')->name('login');
+Route::get('logout','AuthController@logout')->name('logout');
+Route::post('loginPost','AuthController@loginPost')->name('loginPost');
+Route::post('register','AuthController@register')->name('register');
 
 /// Frontend Routes
 Route::get('/','FrontendController@index')->name('home');
@@ -23,8 +27,18 @@ Route::get('addtocart/{id}','FrontendController@addtocart')->name('addtocart');
 Route::get('catproducts/{id}','FrontendController@productsByCat')->name('catproducts');
 Route::get('product/{id}','FrontendController@singleproduct')->name('product');
 Route::post('addtocartproduct','FrontendController@addtocartproduct')->name('addtocartproduct');
+Route::get('cart','FrontendController@cart')->name('cart');
+Route::get('removeproductcart/{id}','FrontendController@removeProductFromCart')->name('removeproductcart');
+
+
+Route::get('search','FrontendController@searchProducts')->name('search');
+Route::get('checkout','FrontendController@checkout')->name('checkout');
+
+
 
 //with middleware - requires login
-Route::group(['prefix' => 'user'], function () {
+Route::group(['prefix' => 'user','middleware' => 'AuthWare'], function () {
     Route::get('addtowishlist/{id}','FrontendController@addtowishlist')->name('addtowishlist');
+    Route::get('wishlist','FrontendController@wishlist')->name('wishlist');
+    Route::get('removefromwishlist/{id}','FrontendController@removefromwishlist')->name('removefromwishlist');
 });

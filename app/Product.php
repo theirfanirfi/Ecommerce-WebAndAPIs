@@ -12,6 +12,10 @@ class Product extends Model
 
     public static function getProducts(){
         return DB::table('products')->leftjoin('categories',['products.cat_id' => 'categories.cat_id'])
-        ->select('product_id','product_name','product_image','products.cat_id','products.created_at','quantity','sold','available','cat_title','product_price');
+        ->select('product_id','product_name','product_image','products.cat_id','products.created_at','quantity','sold','available','cat_title','cat_title','product_price');
+    }
+
+    public function getCat(){
+        return Cat::find($this->cat_id)->cat_title;
     }
 }

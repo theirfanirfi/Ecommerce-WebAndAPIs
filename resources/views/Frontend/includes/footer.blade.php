@@ -57,47 +57,16 @@
                     <!-- ============================================================= LINKS FOOTER ============================================================= -->
                     <div class="link-widget">
                         <div class="widget">
-                            <h3>Find it fast</h3>
+                            <h3>Categories</h3>
                             <ul>
-                                <li><a href="category-grid.html">laptops &amp; computers</a></li>
-                                <li><a href="category-grid.html">Cameras &amp; Photography</a></li>
-                                <li><a href="category-grid.html">Smart Phones &amp; Tablets</a></li>
-                                <li><a href="category-grid.html">Video Games &amp; Consoles</a></li>
-                                <li><a href="category-grid.html">TV &amp; Audio</a></li>
-                                <li><a href="category-grid.html">Gadgets</a></li>
-                                <li><a href="category-grid.html">Car Electronic &amp; GPS</a></li>
-                                <li><a href="category-grid.html">Accesories</a></li>
+                                @foreach ($cats as $c)
+                                <li><a href="{{ route('catproducts',['id' => $c->cat_id]) }}">{{ $c->cat_title }}</a></li>
+                                @endforeach
                             </ul>
                         </div><!-- /.widget -->
                     </div><!-- /.link-widget -->
 
-                    <div class="link-widget">
-                        <div class="widget">
-                            <h3>Information</h3>
-                            <ul>
-                                <li><a href="category-grid.html">Find a Store</a></li>
-                                <li><a href="category-grid.html">About Us</a></li>
-                                <li><a href="category-grid.html">Contact Us</a></li>
 
-                            </ul>
-                        </div><!-- /.widget -->
-                    </div><!-- /.link-widget -->
-
-                    <div class="link-widget">
-                        <div class="widget">
-                            <h3>Information</h3>
-                            <ul>
-                                <li><a href="category-grid.html">My Account</a></li>
-                                <li><a href="category-grid.html">Order Tracking</a></li>
-                                <li><a href="category-grid.html">Wish List</a></li>
-                                <li><a href="category-grid.html">Customer Service</a></li>
-                                <li><a href="category-grid.html">Returns / Exchange</a></li>
-                                <li><a href="category-grid.html">FAQs</a></li>
-                                <li><a href="category-grid.html">Product Support</a></li>
-                                <li><a href="category-grid.html">Extended Service Plans</a></li>
-                            </ul>
-                        </div><!-- /.widget -->
-                    </div><!-- /.link-widget -->
                     <!-- ============================================================= LINKS FOOTER : END ============================================================= -->
                 </div>
             </div><!-- /.container -->

@@ -24,9 +24,9 @@
                                     <div class="body">
                                       <!--  <div class="label-discount green">-50% sale</div> -->
                                         <div class="title">
-                                            <a href="single-product.html">{{ $p->product_name }}</a>
+                                            <a href="{{ route('product',['id' => $p->product_id]) }}">{{ $p->product_name }}</a>
                                         </div>
-                                        <div class="brand">sony</div>
+                                        <div class="brand">{{ $p->cat_title }}</div>
                                     </div>
                                     <div class="prices">
                                             <div class="price-current pull-left">Available: {{ $p->available }}</div>
@@ -64,9 +64,9 @@
                                         <div class="body">
                                           <!--  <div class="label-discount green">-50% sale</div> -->
                                             <div class="title">
-                                                <a href="single-product.html">{{ $p->product_name }}</a>
+                                                <a href="{{ route('product',['id' => $p->product_id]) }}">{{ $p->product_name }}</a>
                                             </div>
-                                            <div class="brand">sony</div>
+                                            <div class="brand">{{ $p->cat_title }}</div>
                                         </div>
                                         <div class="prices">
                                             <div class="price-current pull-left">Available: {{ $p->available }}</div>

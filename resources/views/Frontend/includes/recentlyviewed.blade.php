@@ -1,4 +1,5 @@
  @if(!empty($rvs))
+ @if($rvs->count() > 0)
  <!-- ========================================= RECENTLY VIEWED ========================================= -->
             <section id="recently-reviewd" class="wow fadeInUp">
                 <div class="container">
@@ -14,7 +15,7 @@
 
                         <div id="owl-recently-viewed" class="owl-carousel product-grid-holder">
 
-                            @foreach($rvs as $r)
+                            @foreach($rvs->get() as $r)
                             <div class="no-margin carousel-item product-item-holder size-small hover">
                                 <div class="product-item">
                                     <div class="ribbon red"><span>sale</span></div>
@@ -48,4 +49,5 @@
                 </div><!-- /.container -->
             </section><!-- /#recently-reviewd -->
             <!-- ========================================= RECENTLY VIEWED : END ========================================= -->
+@endif
 @endif
