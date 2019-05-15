@@ -23,15 +23,17 @@ class APIAdminWare
                 return $next($request);
             }else {
                 return response()->json([
-                    'error' => true,
+                    'isError' => true,
                     'isAuthenticated' => false,
                     'unAuthorized' => true,
+                    'message' => 'Invalid credentials, or you are not authorized to perform this action'
                 ]);
             }
         }else {
             return response()->json([
-                'error' => true,
+                'isError' => true,
                 'isAuthenticated' => false,
+                'message' => 'Invalid credentials'
             ]);
         }
     }

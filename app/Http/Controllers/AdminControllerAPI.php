@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Category as Cat;
 use App\Product as Pd;
+use App\Checkout as CK;
+use App\Order;
 class AdminControllerAPI extends Controller
 {
     //
@@ -218,6 +220,156 @@ class AdminControllerAPI extends Controller
                 'isFound' => false,
                 'message' => "No such Product exists in the system."
             ]);
+        }
+    }
+
+    public function getNewOrders(Request $req){
+        $ck = CK::where(['is_processed' => 0]);
+       // $checkouts = $ck->getNewOrders();
+       if($ck->count() > 0){
+        return response()->json([
+            'orders' => $ck->get(),
+            'isFound' => true,
+            'isError' => false,
+            'isAuthenticated' => true,
+        ]);
+       }else {
+        return response()->json([
+            'isFound' => false,
+            'isError' => false,
+            'isAuthenticated' => true,
+        ]);
+       }
+    }
+
+
+    public function getOlderOrders(Request $req){
+        $ck = CK::where(['is_processed' => 1]);
+       // $checkouts = $ck->getNewOrders();
+       if($ck->count() > 0){
+        return response()->json([
+            'orders' => $ck->get(),
+            'isFound' => true,
+            'isError' => false,
+            'isAuthenticated' => true,
+            'message' => 'Loading...'
+        ]);
+       }else {
+        return response()->json([
+            'isFound' => false,
+            'isError' => false,
+            'isAuthenticated' => true,
+            'message' => 'No orders found.'
+        ]);
+       }
+    }
+
+    public function getcheckout(Request $req){
+        $checkout_id = $req->input('checkout_id');
+        if(empty($checkout_id) || !is_numeric($checkout_id) || $checkout_id == null){
+            return response()->json([
+                'isFound' => false,
+                'isError' => true,
+                'isAuthenticated' => true,
+                'message' => 'Arguments must be provided.'
+            ]);
+        }else {
+            $ck = CK::where(['id' => $checkout_id]);
+            if($ck->count() > 0){
+                return response()->json([
+                    'isFound' => true,
+                    'isError' => false,
+                    'isAuthenticated' => true,
+                    'order' => $ck->first(),
+                    'message' => 'Loading'
+                ]);
+            }else {
+                return response()->json([
+                    'isFound' => false,
+                    'isError' => true,
+                    'isAuthenticated' => true,
+                    'message' => 'No such order exists.'
+                ]);
+            }
+        }
+    }
+
+    public function getOrderProducts(Request $req){
+        $checkout_id = $req->input('checkout_id');
+        if(empty($checkout_id) || !is_numeric($checkout_id) || $checkout_id == null){
+            return response()->json([
+                'isFound' => false,
+                'isError' => true,
+                'isAuthenticated' => true,
+                'message' => 'Arguments must be provided.'
+            ]);
+        }else {
+            $ck = CK::where(['id' => $checkout_id]);
+            if($ck->count() > 0){
+                $orders = Order::getOrderProducts($checkout_id);
+                if($orders->count() > 0){
+
+                return response()->json([
+                    'isFound' => true,
+                    'isError' => false,
+                    'isAuthenticated' => true,
+                    'order' => $ck->first(),
+                    'orders' => $orders->get(),
+                    'message' => 'Loading'
+                ]);
+                }else {
+
+                }
+            }else {
+                return response()->json([
+                    'isFound' => false,
+                    'isError' => true,
+                    'isAuthenticated' => true,
+                    'message' => 'No such order exists.'
+                ]);
+            }
+        }
+
+    }
+
+    public function shipOrder(Request $req){
+        $checkout_id = $req->input('checkout_id');
+        if(empty($checkout_id) || !is_numeric($checkout_id) || $checkout_id == null){
+            return response()->json([
+                'isShipped' => false,
+                'isError' => true,
+                'isAuthenticated' => true,
+                'message' => 'Arguments must be provided.'
+            ]);
+        }else {
+            $ck = CK::where(['id' => $checkout_id, 'is_processed' => 0]);
+            if($ck->count() > 0){
+                $ck = $ck->first();
+                $ck->is_processed = 1;
+                if($ck->save()){
+
+                return response()->json([
+                    'isShipped' => true,
+                    'isError' => false,
+                    'isAuthenticated' => true,
+                    'message' => 'The order is shipped.'
+                ]);
+                }else {
+                    return response()->json([
+                        'isShipped' => false,
+                        'isError' => true,
+                        'isAuthenticated' => true,
+                        'message' => 'Error occurred in shipping the order. Try again.'
+                    ]);
+                }
+            }else {
+                return response()->json([
+                    'isShipped' => false,
+                    'isError' => true,
+                    'isAuthenticated' => true,
+                    'message' => 'No such order exists.'
+                ]);
+            }
         }
     }
 
