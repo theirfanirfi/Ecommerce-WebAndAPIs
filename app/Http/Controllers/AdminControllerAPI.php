@@ -374,4 +374,92 @@ class AdminControllerAPI extends Controller
     }
 
 
+    public function updateProduct(Request $req){
+        $name = $req->input('product_name');
+        $quantity = $req->input('product_quantity');
+        $price = $req->input('product_price');
+        $cat_id = $req->input('cat_id');
+        $pid = $req->input('product_id');
+
+        if(empty($name) || empty($quantity) ||empty($cat_id) || empty($pid)){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'message' => "Arguments must be provided."
+            ]);
+        }else {
+            if($req->hasFile('image')){
+                $file = $req->file('image');
+                $extension = $file->getClientOriginalExtension();
+                $product_image_name = time().$quantity.$cat_id.rand(0,10000).".".$extension;
+                $path = "./uploads/products/";
+
+                if($file->move($path,$product_image_name)){
+                    $product = Pd::find($pid);
+                    $product->product_name = $name;
+                    $product->quantity = $product->available + $quantity;
+                    $product->available = $product->available + $quantity;
+                  //  $product->sold = 0;
+                    $product->product_price = $price;
+                    $product->cat_id = $cat_id;
+                    $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
+
+                    if($product->save()){
+                        return response()->json([
+                            'isAuthenticated' => true,
+                            'isError' => false,
+                            'isSaved' => true,
+                            'message' => "Product Updated."
+                        ]);
+                    }else {
+                        return response()->json([
+                            'isAuthenticated' => true,
+                            'isError' => true,
+                            'message' => "Error occurred in saving the uploaded image. Please try again."
+                        ]);
+                    }
+                }else {
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => true,
+                        'message' => "Error occurred in uploading the image. Please try again."
+                    ]);
+                }
+
+            }else {
+                // return response()->json([
+                //     'isAuthenticated' => true,
+                //     'isError' => true,
+                //     'message' => "Product Image must be provided."
+                // ]);
+
+
+                $product = Pd::find($pid);
+                $product->product_name = $name;
+                $product->quantity = $product->available + $quantity;
+                $product->available = $product->available + $quantity;
+              //  $product->sold = 0;
+                $product->product_price = $price;
+                $product->cat_id = $cat_id;
+               // $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
+
+                if($product->save()){
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => false,
+                        'isSaved' => true,
+                        'message' => "Product Updated."
+                    ]);
+                }else {
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => true,
+                        'message' => "Error occurred in saving the uploaded image. Please try again."
+                    ]);
+                }
+            }
+        }
+    }
+
+
 }

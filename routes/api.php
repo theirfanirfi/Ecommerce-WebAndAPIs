@@ -31,6 +31,7 @@ Route::get('/getproduct','AdminControllerAPI@getProduct');
 Route::get('/deleteproduct','AdminControllerAPI@deleteproduct');
 
 Route::post('addproduct','AdminControllerAPI@addproduct');
+Route::post('updateproduct','AdminControllerAPI@updateProduct');
 
 Route::get('getneworders', 'AdminControllerAPI@getNewOrders');
 Route::get('getoldorders', 'AdminControllerAPI@getOlderOrders');
