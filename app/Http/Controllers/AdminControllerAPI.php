@@ -7,6 +7,8 @@ use App\Category as Cat;
 use App\Product as Pd;
 use App\Checkout as CK;
 use App\Order;
+use App\User;
+use Illuminate\Support\Facades\Hash;
 class AdminControllerAPI extends Controller
 {
     //
@@ -88,8 +90,17 @@ class AdminControllerAPI extends Controller
         }
     }
 
-    public function getProducts(){
-        $products = Pd::getProducts();
+    public function getProducts(Request $req){
+        $cat_id = $req->input('cat_id');
+        if(empty($cat_id) || !is_numeric($cat_id) || $cat_id == null){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => 'Category Id must be provided.'
+            ]);
+        }else {
+        $products = Pd::getProductsByCat($cat_id);
         if($products->count() > 0){
             return response()->json([
                 'isAuthenticated' => true,
@@ -100,11 +111,12 @@ class AdminControllerAPI extends Controller
         }else {
             return response()->json([
                 'isAuthenticated' => true,
-                'isError' => false,
+                'isError' => true,
                 'isFound' => false,
                 'message' => 'No products found'
             ]);
         }
+    }
     }
 
     public function addproduct(Request $req){
@@ -459,6 +471,176 @@ class AdminControllerAPI extends Controller
                 }
             }
         }
+    }
+
+    public function getmembers(Request $req){
+        $members = User::getMembers();
+        if($members->count() > 0){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => false,
+                'isFound' => true,
+                'members' => $members->get(),
+                'message' => "Loading"
+            ]);
+        }else {
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => "No Member found."
+            ]);
+        }
+    }
+
+    public function getMemberCheckouts(Request $req){
+        $mem_id = $req->input('mem_id');
+        if(empty($mem_id) || !is_numeric($mem_id) || $mem_id == null){
+            return response()->json([
+                'isShipped' => false,
+                'isError' => true,
+                'isAuthenticated' => true,
+                'message' => 'Arguments must be provided.'
+            ]);
+        }else {
+            $user = User::where(['id' => $mem_id,'role' => 0]);
+            if($user->count() > 0){
+        $ck = CK::where(['user_id' => $mem_id]);
+        if($ck->count() > 0){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => false,
+                'isFound' => true,
+                'checkouts' => $ck->get(),
+                'message' => "Loading"
+            ]);
+        }else {
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => "No Checkout for this user found."
+            ]);
+        }
+    }else {
+        return response()->json([
+            'isAuthenticated' => true,
+            'isError' => true,
+            'isFound' => false,
+            'message' => "No such member exists in the system."
+        ]);
+    }
+}
+    }
+
+    public function getProfile(Request $req){
+        $token = $req->input('token');
+        $profile = User::getProfile($token);
+        if($profile->count() > 0){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => false,
+                'isFound' => true,
+                'user' => $profile->first(),
+                'message' => "Loading..."
+            ]);
+        }else {
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => "No profile found."
+            ]);
+        }
+    }
+
+    public function updateProfile(Request $req){
+        $token = $req->input('token');
+        $email = $req->input('email');
+        $name = $req->input('name');
+        $duration = $req->input('sduration');
+        $updatePassword = $req->input('uc');
+
+        if(empty($email) || empty($name) || empty($duration) || !is_numeric($duration) || empty($updatePassword) || !is_numeric($updatePassword)){
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isUpdated' => false,
+                'message' => "Arguments must be provided."
+            ]);
+        }else {
+
+            $profile = User::getProfile($token);
+            if($profile->count() > 0){
+                $pf = $profile->first();
+                $pf->name = $name;
+                $pf->email = $email;
+                $pf->shipmentduration = $duration;
+
+            if($updatePassword == 1){
+                $cpass = $req->input('cpass');
+                $npass = $req->input('npass');
+
+                if(empty($cpass) || empty($npass)){
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => true,
+                        'isUpdated' => false,
+                        'message' => "Password fields cannot be empty."
+                    ]);
+                }else if(strlen($npass) < 6) {
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => true,
+                        'isUpdated' => false,
+                        'message' => "Password length must be atleast six characters long."
+                    ]);
+                }else {
+                    if(Hash::check($cpass, $pf->password)){
+                        $pf->password = Hash::make($npass);
+                    }else {
+                        return response()->json([
+                            'isAuthenticated' => true,
+                            'isError' => true,
+                            'isUpdated' => false,
+                            'message' => "Current Password is invalid."
+                        ]);
+                    }
+                }
+            }
+
+
+            if($pf->save()){
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isUpdated' => true,
+                    'user' => $profile->first(),
+                    'message' => "Profile updated."
+                ]);
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isUpdated' => false,
+                    'message' => "Error occurred in saving the updation. Please try again."
+                ]);
+            }
+
+
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => true,
+                    'isFound' => false,
+                    'message' => "No profile found."
+                ]);
+            }
+
+
+        }
+
+
     }
 
 

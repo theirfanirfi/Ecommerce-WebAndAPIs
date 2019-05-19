@@ -18,6 +18,7 @@ class CreateCheckoutTable extends Migration
             $table->string('firstname');
             $table->string('lastname')->nullable();
             $table->string('address');
+            $table->bigInteger('user_id')->unsigned()->default(0);
             $table->string('town');
             $table->string('postalcode');
             $table->string('email')->nullable();
@@ -26,6 +27,7 @@ class CreateCheckoutTable extends Migration
             $table->integer('products_quantity');
             $table->integer('total_price');
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

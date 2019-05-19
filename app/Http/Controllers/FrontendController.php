@@ -162,6 +162,8 @@ class FrontendController extends Controller
                 $wl->product_id = $id;
                 $wl->user_id = $user->id;
                 if($wl->save()){
+                    $wls = WL::where(['user_id' => $user->id])->count();
+                    Session()->put('wl',$wls);
                     return redirect()->back()->with('success','Product Added to your WishList.');
                 }else {
             return redirect()->back()->with('error','Error occurred in adding the product to your WishList. Try Again.');

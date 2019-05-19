@@ -38,6 +38,13 @@ Route::get('getoldorders', 'AdminControllerAPI@getOlderOrders');
 Route::get('getcheckout','AdminControllerAPI@getcheckout');
 Route::get('getorderproducts','AdminControllerAPI@getOrderProducts');
 Route::get('shiporder','AdminControllerAPI@shipOrder');
+Route::get('getmem','AdminControllerAPI@getmembers');
+Route::get('getmemcheckouts','AdminControllerAPI@getMemberCheckouts');
+
+//profile
+Route::get('getprofile','AdminControllerAPI@getprofile');
+Route::post('updateprofile','AdminControllerAPI@updateProfile');
+
 
 });
 
