@@ -49,7 +49,7 @@ Route::post('updateprofile','AdminControllerAPI@updateProfile');
 });
 
 
-
+Route::get('s','AdminControllerAPI@sendEmail');
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });

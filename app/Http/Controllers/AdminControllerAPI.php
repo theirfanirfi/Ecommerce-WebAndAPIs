@@ -8,6 +8,8 @@ use App\Product as Pd;
 use App\Checkout as CK;
 use App\Order;
 use App\User;
+use App\Mail\OrderShipped as OPM;
+use Mail;
 use Illuminate\Support\Facades\Hash;
 class AdminControllerAPI extends Controller
 {
@@ -560,8 +562,7 @@ class AdminControllerAPI extends Controller
         $name = $req->input('name');
         $duration = $req->input('sduration');
         $updatePassword = $req->input('uc');
-
-        if(empty($email) || empty($name) || empty($duration) || !is_numeric($duration) || empty($updatePassword) || !is_numeric($updatePassword)){
+        if(empty($email) || empty($name) || empty($duration) || !is_numeric($duration) ){
             return response()->json([
                 'isAuthenticated' => true,
                 'isError' => true,
@@ -571,16 +572,27 @@ class AdminControllerAPI extends Controller
         }else {
 
             $profile = User::getProfile($token);
+
+
             if($profile->count() > 0){
                 $pf = $profile->first();
                 $pf->name = $name;
+                $checkEmail = User::where(['email' => $email])->where('id','!=',$pf->id)->count();
+                if($checkEmail == 0){
                 $pf->email = $email;
+                }else {
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => true,
+                        'isUpdated' => false,
+                        'message' => "The entered email is already taken. Please use another one."
+                    ]);
+                }
                 $pf->shipmentduration = $duration;
 
             if($updatePassword == 1){
                 $cpass = $req->input('cpass');
                 $npass = $req->input('npass');
-
                 if(empty($cpass) || empty($npass)){
                     return response()->json([
                         'isAuthenticated' => true,
@@ -593,7 +605,7 @@ class AdminControllerAPI extends Controller
                         'isAuthenticated' => true,
                         'isError' => true,
                         'isUpdated' => false,
-                        'message' => "Password length must be atleast six characters long."
+                        'message' => "Password length must be at least six characters long."
                     ]);
                 }else {
                     if(Hash::check($cpass, $pf->password)){
@@ -615,7 +627,7 @@ class AdminControllerAPI extends Controller
                     'isAuthenticated' => true,
                     'isError' => false,
                     'isUpdated' => true,
-                    'user' => $profile->first(),
+                    'user' => $pf,
                     'message' => "Profile updated."
                 ]);
             }else {
@@ -641,6 +653,30 @@ class AdminControllerAPI extends Controller
         }
 
 
+    }
+
+    // public function sendEmail(){
+    //     $data['title'] = 'working';
+    //     Mail::to('theirfi@gmail.com')->send(new OPM($data));
+    // }
+
+
+    public function sendEmail()
+    {
+        $data['title'] = "This is Test Mail Tuts Make";
+
+        Mail::send('Mail.ordershipped', $data, function($message) {
+
+            $message->to('tutsmake@gmail.com', 'Receiver Name')
+
+                    ->subject('Tuts Make Mail');
+        });
+
+        if (Mail::failures()) {
+           return response()->Fail('Sorry! Please try again latter');
+         }else{
+           return response()->success('Great! Successfully send in your mail');
+         }
     }
 
 

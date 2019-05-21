@@ -75,7 +75,7 @@
                             <!-- ============================================================= SHOPPING CART DROPDOWN ============================================================= -->
                             <div class="top-cart-holder dropdown animate-dropdown">
                                 <div class="basket">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="{{ route('cart') }}">
+                                    <a class="dropdown-toggle" href="{{ route('cart') }}">
                                         <div class="basket-item-count">
                                             <span class="count"><?php if(Session()->has('cart')){ $arr = Session()->get('cart'); echo $arr['num']; } else { echo "0"; } ?></span>
                                             <img src="{{ URL::asset('images/icon-cart.png') }}" alt="" />

@@ -32,13 +32,14 @@ Route::get('removeproductcart/{id}','FrontendController@removeProductFromCart')-
 
 
 Route::get('search','FrontendController@searchProducts')->name('search');
-Route::get('checkout','FrontendController@checkout')->name('checkout');
-
-
+Route::get('pay','PaymentController@pay');
+Route::get('paid','PaymentController@getPaymentStatus')->name('paid ');
 
 //with middleware - requires login
 Route::group(['prefix' => 'user','middleware' => 'AuthWare'], function () {
     Route::get('addtowishlist/{id}','FrontendController@addtowishlist')->name('addtowishlist');
     Route::get('wishlist','FrontendController@wishlist')->name('wishlist');
     Route::get('removefromwishlist/{id}','FrontendController@removefromwishlist')->name('removefromwishlist');
+    Route::get('checkout','FrontendController@checkout')->name('checkout');
+    Route::get('placeorder','FrontendController@placeorder')->name('placeorder');
 });

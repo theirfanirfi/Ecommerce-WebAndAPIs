@@ -65,6 +65,6 @@ class User extends Authenticatable
 
     public static function getProfile($token){
         return User::where(['token' => $token,'role' => 1])
-        ->select('id','name','email','shipmentduration');
+        ->select('id','name','email','shipmentduration','password');
     }
 }

@@ -69,7 +69,7 @@
                             </li>
                         </ul>
                         <div class="buttons-holder">
-                            <a class="le-button big" href="checkout.html" >checkout</a>
+                            <a class="le-button big" href="{{ route('checkout') }}" >checkout</a>
                             <a class="simple-link block" href="{{ route('home') }}" >continue shopping</a>
                         </div>
                     </div>

@@ -285,7 +285,38 @@ class FrontendController extends Controller
 
     public function checkout(){
         $cats = Cat::all();
-        return view('Frontend.checkout',['cats' => $cats]);
+        $user = Auth::user();
+
+        $products = "";
+        $quantities = array();
+       if(Session()->has('cart')){
+        $cart = Session()->get('cart');
+        $pro = $cart['pro'];
+       // dd(array_keys($pro));
+       $keys = array_keys($pro);
+        $ids = array();
+        $i = 0;
+        while($i < count($keys)){
+            $opro = $pro[$keys[$i]];
+            $oproid = $opro['product_id'];
+             $ids[] = $oproid;
+             $quantities[$oproid] = $opro['quantity'];
+            $i++;
+       }
+
+       Session()->put('cart_quantities',$quantities);
+       $products = Pd::whereIn('product_id',$ids)->get();
+
+        return view('Frontend.checkout',['quantities' => $quantities,'cats' => $cats, 'products' => $products,'user' => $user]);
+       }else {
+        return view('Frontend.checkout',['quantities' => $quantities,'cats' => $cats, 'products' => $products,'user' => $user]);
+       }
+
+        //return view('Frontend.checkout',['cats' => $cats,'user' => $user]);
+    }
+
+    public function placeorder(){
+
     }
 
 
