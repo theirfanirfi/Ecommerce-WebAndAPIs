@@ -7,14 +7,14 @@
 
                             <div class="billing-address">
                                 <h2 class="border h1">billing address</h2>
-                                <form>
+                                <form action="{{ route('placeorder') }}" method="post">
                                     <div class="row field-row">
                                         <div class="col-xs-12 col-sm-6">
                                             <label>Full name*</label>
                                             <input class="le-input" name="name" value="{{ $user->name }}">
                                         </div>
                                     </div><!-- /.field-row -->
-
+                                    @csrf
                                     <div class="row field-row">
                                         <div class="col-xs-12">
                                             <label>company name</label>
@@ -51,14 +51,13 @@
 
 
 
-                                </form>
                             </div><!-- /.billing-address -->
 
 
 
                             <section id="your-order">
                                 <h2 class="border h1">your order</h2>
-                                <form>
+
                                         @if(!empty($products))
                                         @foreach ($products as $p)
                                     <div class="row no-margin order-item">
@@ -77,7 +76,7 @@
                                     </div><!-- /.order-item -->
                                     @endforeach
                                     @endif
-                                </form>
+
                             </section><!-- /#your-order -->
 
                             <div id="total-area" class="row no-margin">
@@ -111,17 +110,19 @@
                             </div><!-- /#total-area -->
 
                             <div id="payment-method-options">
-                                <form>
+
 
                                     <div class="payment-method-option">
                                         <input class="le-radio" type="radio" name="group2" value="paypal" checked>
                                         <div class="radio-label bold ">paypal system (payment method)</div>
                                     </div><!-- /.payment-method-option -->
-                                </form>
+
                             </div><!-- /#payment-method-options -->
 
                             <div class="place-order-button">
-                                <a href="{{ route('placeorder') }}" class="le-button big">place order</a>
+                                <button type="submit" class="le-button big">place order</button>
+                            </form>
+
                             </div><!-- /.place-order-button -->
 
                         </div><!-- /.col -->

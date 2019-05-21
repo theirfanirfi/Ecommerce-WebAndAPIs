@@ -64,6 +64,7 @@
                             <li><a href="{{ route('login') }}">Register</a></li>
                             <li><a href="{{ route('login') }}">Login</a></li>
                             @else
+                            <li><a href="{{ route('account') }}">My Account</a></li>
                             <li><a href="{{ route('logout') }}">Logout</a></li>
                             @endif
                         </ul>

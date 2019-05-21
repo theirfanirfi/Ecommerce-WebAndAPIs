@@ -15,6 +15,9 @@ use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use PayPal\Api\PaymentExecution;
 use URL;
+use App\Order;
+use App\Checkout as CK;
+use Auth;
 class PaymentController extends Controller
 {
     //
@@ -30,31 +33,55 @@ class PaymentController extends Controller
     }
 
 public function pay(){
-    $payer = new Payer();
+    $session_id = session()->getId();
+    $user = Auth::user();
+    $orders = Order::getCheckoutWithOrder($session_id,$user->id);
+    $ck = CK::getCheckout($session_id,$user->id);
+    if($orders->count() > 0 && $ck->count() > 0){
+        $orders = $orders->get();
+         $payer = new Payer();
         $payer->setPaymentMethod('paypal');
+        $items =  array();
 
+        $description = "Bill for the following products: ";
 
-        //here items should be defined.
+$i = 1;
+        foreach($orders as $o){
+            // $item_1 = new Item();
+            // $item_1->setName($o->product_name) /** item name **/
+            //     ->setCurrency('USD')
+            //     ->setQuantity($o->quantity_ordered)
+            //    // ->setPrice($request->get('amount')); /** unit price **/
+            //     ->setPrice($o->total_ordered_product_price); /** unit price **/
+            //     $items[] = $item_1;
+
+            $description .= "  ".$i.") Product Name: ".$o->product_name. " Price: ".$o->product_price." , Ordered: ".$o->quantity_ordered.", Total: ".$o->total_ordered_product_price;
+            $i++;
+        }
+
+        $ck = $ck->first();
+        // //here items should be defined.
         $item_1 = new Item();
-        $item_1->setName('Item 1') /** item name **/
+        $item_1->setName('Bill for the products') /** item name **/
             ->setCurrency('USD')
-            ->setQuantity(1)
+            ->setQuantity($ck->products_quantity)
            // ->setPrice($request->get('amount')); /** unit price **/
-            ->setPrice(200); /** unit price **/
+            ->setPrice($ck->total_price); /** unit price **/
         $item_list = new ItemList();
 
 
 //items should be added to the items list.
-        $item_list->setItems(array($item_1));
+      //  $item_list->setItems($items);
         $amount = new Amount();
         $amount->setCurrency('USD')
-            ->setTotal(200);
-
+            ->setTotal($ck->total_price);
+            // var_dump($item_list);
+            // exit();
             //transaction for the item list should be performed.
         $transaction = new Transaction();
         $transaction->setAmount($amount)
             ->setItemList($item_list)
-            ->setDescription('Your transaction description');
+            ->setDescription($description);
 
             //redirect urls
         $redirect_urls = new RedirectUrls();
@@ -95,6 +122,9 @@ public function pay(){
         }
         session()->put('error', 'Unknown error occurred');
         return redirect('/');
+    }else {
+        return redirect('/')->with('error','No products found in your cart to be paid for.');
+    }
     }
 
     public function getPaymentStatus(Request $req)
@@ -102,8 +132,11 @@ public function pay(){
         /** Get the payment ID before session clear **/
         $payment_id = session()->get('paypal_payment_id');
         $payment_id = $req->input('paymentId');
-
-        if (empty($req->get('PayerID')) || empty($req->get('token'))) {
+        $session_id = session()->getId();
+        $user = Auth::user();
+        $ck = CK::getCheckout($session_id,$user->id)->first();
+        $payer_id = $req->get('PayerID');
+        if (empty($payer_id) || empty($req->get('token'))) {
             session()->put('error', 'Payment failed');
             return redirect('/');
         }
@@ -113,12 +146,29 @@ public function pay(){
         /**Execute the payment **/
         $result = $payment->execute($execution, $this->_api_context);
         if ($result->getState() == 'approved') {
-            session()->put('success', 'Payment success');
+
+            $ck->payer_id = $payer_id;
+            $ck->payment_id = $payment_id;
+            $ck->is_paid = 1;
+            if($ck->save()){
+                //session()->put('success', 'Payment success');
+                session()->forget('paypal_payment_id');
+                session()->regenerate();
+                session()->forget(['cart','total_cart_cost']);
+                return redirect('/')->with('success','You have successfully paid for the products. You will shortly be contacted by the authorities.');
+            }else {
+                return redirect('/cart')->with('error','Payment payed, but error occurred in updating your record. please contact with the administrator and show them your Payment details \n
+                Payment ID:'.$payment_id. '\n Payer Id: '.$payer_id);
+            }
+
             // clear the session payment ID **/
-             session()->forget('paypal_payment_id');
-            return redirect('/');
+
         }
-        session()->put('error', 'Payment failed');
-        return redirect('/');
+        return redirect('/')->with('error','Payment failed. Please try again.');
+    }
+
+    public function check(){
+        $session_id = session()->getId();
+        echo $session_id;
     }
 }

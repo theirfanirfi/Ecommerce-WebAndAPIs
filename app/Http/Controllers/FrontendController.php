@@ -8,7 +8,10 @@ use App\Product as Pd;
 use App\Category as Cat;
 use App\RecentlyViewed as RV;
 use App\WhishList as WL;
+use App\Order;
+use App\Checkout as CK;
 use Auth;
+use Illuminate\Support\Facades\Hash;
 class FrontendController extends Controller
 {
     //
@@ -47,7 +50,7 @@ class FrontendController extends Controller
                     $arr['pro'] = $pro;
                     $num = $num + 1;
                     $arr['num'] = $num;
-                    $price = $price + $product->product_price * 1;
+                    $price = $price + ($product->product_price * 1);
                     $arr['pro'] = $pro;
                     Session()->put('cart',$arr);
                     Session()->put('total_cart_cost',$price);
@@ -114,7 +117,7 @@ class FrontendController extends Controller
                $arr['pro'] = $pro;
                $num = $num + $quantity;
                $arr['num'] = $num;
-               $price = $price + $product->product_price * $quantity;
+               $price = $price + ($product->product_price * $quantity);
                }else {
                    $modifyProductInTheArray = $pro[$id];
                    $num = $arr['num'];
@@ -123,7 +126,7 @@ class FrontendController extends Controller
                    $modifyProductInTheArray['quantity'] = $quantity;
                    unset($pro[$id]);
                    $pro[$id] = $modifyProductInTheArray;
-                   $price = $price + $product->product_price * $quantity;
+                   $price = $price + ($product->product_price * $quantity);
                    $arr['pro'] = $pro;
                    $num = $num + $quantity;
                    $arr['num'] = $num;
@@ -315,9 +318,174 @@ class FrontendController extends Controller
         //return view('Frontend.checkout',['cats' => $cats,'user' => $user]);
     }
 
-    public function placeorder(){
+    public function placeorder(Request $req){
+
+
+        $fullname = $req->input('name');
+        $company = $req->input('company');
+        $address = $req->input('address');
+        $town = $req->input('citytown');
+        $postalcode = $req->input('postcode');
+        $email = $req->input('email');
+        $phone = $req->input('phone');
+        $isCartSaved = true;
+
+        if(empty($fullname) || empty($address) || empty($town) || empty($postalcode) || empty($email) || empty($phone)){
+            return redirect()->back()->with('error','None of the fields can be empty.');
+        }else {
+
+        $user = Auth::user();
+        $products = "";
+        $quantities = array();
+       if(Session()->has('cart')){
+        $cart = Session()->get('cart');
+        $pro = $cart['pro'];
+       // dd(array_keys($pro));
+       $keys = array_keys($pro);
+        $ids = array();
+        $i = 0;
+
+        while($i < count($keys)){
+            $opro = $pro[$keys[$i]];
+            $oproid = $opro['product_id'];
+             $ids[] = $oproid;
+             $quantities[$oproid] = $opro['quantity'];
+            $i++;
+       }
+
+       $num = $cart['num'];
+       $products = Pd::whereIn('product_id',$ids)->get();
+       $session_id = session()->getId();
+       $num = $cart['num'];
+       $price = Session()->get('total_cart_cost');
+
+       $checkWhetherCheckoutExistsOrNot = CK::Where(['session_id' => $session_id,'user_id' => $user->id])->count();
+
+       if($checkWhetherCheckoutExistsOrNot > 0){
+           //do nothing
+       }else {
+
+            // foreach($products as $p){
+            //     echo $p->product_id. " : name : ".$p->product_name. " : quantity: ".$quantities[$p->product_id].
+            //     ": price: ".$p->product_price." : total cost : ".$p->product_price*$quantities[$p->product_id]."</br/>";
+            // }
+
+           $ck = new CK();
+           $ck->firstname = $fullname;
+           $ck->company = $company;
+           $ck->address = $address;
+           $ck->town = $town;
+           $ck->postalcode = $postalcode;
+           $ck->email = $email;
+           $ck->postalcode = $postalcode;
+           $ck->phonenumber = $phone;
+           $ck->total_price = $price;
+           $ck->products_quantity = $num;
+           $ck->user_id = $user->id;
+           $ck->session_id = $session_id;
+           $ck->is_checkout = 1;
+           if($ck->save()){
+               foreach($products as $p){
+                 $o = new Order();
+                 $o->checkout_id = $ck->id;
+                 $o->product_id = $p->product_id;
+                 $o->product_price = $p->product_price;
+                 $o->quantity_ordered = $quantities[$p->product_id];
+                 $o->total_ordered_product_price = $p->product_price*$quantities[$p->product_id];
+                 if(!$o->save()){
+                      $isCartSaved = false;
+                     $ck->delete();
+                     return redirect()->back()->with('error','Error occurred in saving the cart. Please try again.');
+                     break;
+                     exit();
+                 }
+
+               }
+
+               if(!$isCartSaved){
+                return redirect()->back()->with('error','Error occurred in saving the cart. Please try again.');
+               }else {
+                   return redirect('/pay');
+               }
+           }else {
+            return redirect()->back()->with('error','Error occurred in saving the cart. Please try again.');
+           }
+
+
+       }
+
+
+    }else {
+        return redirect()->back()->with('error','Your Cart is empty.');
+    }
+}
+}
+
+
+public function myaccount(){
+    $user = Auth::user();
+    $cats = Cat::all();
+    $paidCheckOuts = CK::where(['user_id' => $user->id,'is_paid' => 1]);
+    $unPaidCheckOuts = CK::where(['user_id' => $user->id,'is_paid' => 0]);
+    return view('Frontend.myaccount',['user' => $user, 'cats' => $cats, 'paid' => $paidCheckOuts, 'unpaid' => $unPaidCheckOuts]);
+}
+
+public function updateaccount(Request $req){
+    $name = $req->input('name');
+    $email = $req->input('email');
+
+    if(empty($name) || empty($email)){
+    }else{
+        $user = Auth::user();
+
+        if($email !== $user->email){
+            $checkEmail = User::where(['email' => $email])->count();
+            if($checkEmail > 0){
+                return redirect()->back()->with('error','The email is already taken. Use another one.');
+            }else {
+                $user->email = $email;
+            }
+        }
+
+        if($name !== $user->name){
+            $user->name = $name;
+        }
+
+
+
+
+        if($user->save()){
+            return redirect()->back()->with('success','Account updated.');
+        }else{
+            return redirect()->back()->with('error','Error occurred in updating the account. Please try again.');
+        }
+    }
+}
+
+    public function changepassword(Request $req){
+        $cpass = $req->input('current_pass');
+        $npass = $req->input('new_pass');
+        $user = Auth::user();
+            if(empty($cpass) || empty($npass)){
+                return redirect()->back()->with('error','Both the password fields are required.');
+            }else if(strlen($npass) < 6){
+                return redirect()->back()->with('error','New password length must be at least six characters long.');
+            }else {
+                if(Hash::check($cpass, $user->password)){
+                    $user->password = Hash::make($npass);
+                    if($user->save()){
+                        return redirect()->back()->with('success','Password successfully changed..');
+                    }else {
+            return redirect()->back()->with('error','Error occurred in updating the password. Please try again.');
+
+                    }
+                }else{
+                    return redirect()->back()->with('error','Invalid current password');
+                }
+            }
 
     }
+
 
 
 }

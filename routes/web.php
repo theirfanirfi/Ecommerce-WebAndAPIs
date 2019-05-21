@@ -32,8 +32,10 @@ Route::get('removeproductcart/{id}','FrontendController@removeProductFromCart')-
 
 
 Route::get('search','FrontendController@searchProducts')->name('search');
-Route::get('pay','PaymentController@pay');
-Route::get('paid','PaymentController@getPaymentStatus')->name('paid ');
+
+
+Route::get('s','PaymentController@check');
+//Route::get('placeorder','FrontendController@placeorder');
 
 //with middleware - requires login
 Route::group(['prefix' => 'user','middleware' => 'AuthWare'], function () {
@@ -41,5 +43,11 @@ Route::group(['prefix' => 'user','middleware' => 'AuthWare'], function () {
     Route::get('wishlist','FrontendController@wishlist')->name('wishlist');
     Route::get('removefromwishlist/{id}','FrontendController@removefromwishlist')->name('removefromwishlist');
     Route::get('checkout','FrontendController@checkout')->name('checkout');
-    Route::get('placeorder','FrontendController@placeorder')->name('placeorder');
+    Route::post('placeorder','FrontendController@placeorder')->name('placeorder');
+    Route::post('updateaccount','FrontendController@updateaccount')->name('updateaccount');
+    Route::post('changepassword','FrontendController@changepassword')->name('changepassword');
+
+    Route::get('account','FrontendController@myaccount')->name('account');
+    Route::get('pay','PaymentController@pay')->name('pay');
+    Route::get('paid','PaymentController@getPaymentStatus')->name('paid ');
 });

@@ -21,7 +21,7 @@ class CreateProductsorderedTable extends Migration
             $table->integer('product_price');
             $table->integer('quantity_ordered');
             $table->integer('is_shipment_charges')->default(0);
-            $table->integer('shipment_charges')->nullable();
+            $table->integer('shipment_charges')->default(0);
             $table->timestamps();
             $table->foreign('checkout_id')->references('id')->on('checkout')->onDelete('cascade');
             $table->foreign('product_id')->references('product_id')->on('products')->onDelete('cascade');

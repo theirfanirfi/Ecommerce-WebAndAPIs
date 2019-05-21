@@ -23,9 +23,16 @@ class CreateCheckoutTable extends Migration
             $table->string('postalcode');
             $table->string('email')->nullable();
             $table->string('phonenumber');
+            $table->string('session_id');
+            $table->string('company')->nullable();
             $table->integer('is_processed')->default(0);
             $table->integer('products_quantity');
             $table->integer('total_price');
+            $table->integer('total_ordered_product_price');
+            $table->integer('is_checkout')->default(0);
+            $table->integer('is_redirected_to_payment')->default(0);
+            $table->integer('payment_status')->default(0);
+            $table->integer('is_paid')->default(0);
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users');
         });

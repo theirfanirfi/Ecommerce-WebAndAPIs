@@ -73,8 +73,9 @@ class AuthController extends Controller
 
     public function logout(){
         Auth::logout();
-            Session()->forget(['cart','total_cart_cost','redirect_url']);
-            return redirect('/')->with('info','You have logged out.');
+        Session()->flush();
+        Session()->forget(['cart','total_cart_cost','redirect_url']);
+        return redirect('/')->with('info','You have logged out.');
     }
 
 }
