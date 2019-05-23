@@ -68,14 +68,14 @@
                         <th>Products</th>
                         <th>Created on</th>
                         <th>Total Price</th>
-                        <th>Delete</th>
+                        {{-- <th>Delete</th> --}}
                     @foreach ($paid->get() as $p)
 
                         <tr>
-                            <td>{{ $p->products_quantity }} </td>
+                            <td> {{  $p->products_quantity }} | <a href="{{ route('savedcart',['id' => $p->id]) }}">View</a></td>
                             <td>{{ $p->created_at }}</td>
                             <td>${{ $p->total_price }}</td>
-                            <td>Delete</td>
+                            {{-- <td>Delete</td> --}}
                         </tr>
                     @endforeach
 
@@ -105,11 +105,11 @@
                                     @foreach ($unpaid->get() as $p)
 
                                         <tr>
-                                            <td>{{ $p->products_quantity }}</td>
+                                            <td>{{ $p->products_quantity }} | <a href="{{ route('savedcart',['id' => $p->id]) }}">View</a></td>
                                             <td>{{ $p->created_at }}</td>
                                             <td>${{ $p->total_price }}</td>
                                             <td>${{ $p->total_price }}</td>
-                                            <td>Delete</td>
+                                            <td><a href="{{ route('deletesavedcheckout',['id' => $p->id]) }}">Delete</a></td>
                                         </tr>
                                     @endforeach
 

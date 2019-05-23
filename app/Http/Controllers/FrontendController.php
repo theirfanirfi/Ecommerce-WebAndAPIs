@@ -363,6 +363,17 @@ class FrontendController extends Controller
 
        if($checkWhetherCheckoutExistsOrNot > 0){
            //do nothing
+           $dck = CK::Where(['session_id' => $session_id,'user_id' => $user->id,'is_paid' => 0]);
+           if($dck->count() > 0){
+               $dck = $dck->first();
+               if($dck->delete()){
+                   return redirect('/user/checkout')->with('error','Please try again.');
+               }else {
+                return redirect('/user/checkout')->with('error','Please try again.');
+
+               }
+           }
+
        }else {
 
             // foreach($products as $p){
@@ -405,7 +416,7 @@ class FrontendController extends Controller
                if(!$isCartSaved){
                 return redirect()->back()->with('error','Error occurred in saving the cart. Please try again.');
                }else {
-                   return redirect('/pay');
+                   return redirect('/user/pay');
                }
            }else {
             return redirect()->back()->with('error','Error occurred in saving the cart. Please try again.');
@@ -485,6 +496,159 @@ public function updateaccount(Request $req){
             }
 
     }
+
+    public function savedcart($id){
+       // $isPaid = false;
+
+        if(!is_numeric($id) || $id == null || empty($id)){
+            return redirect()->back()->with('error','Checkout Id must be provided.');
+        }else {
+            $user = Auth::user();
+        $ck = CK::getSavedCheckout($id,$user->id);
+        if($ck->count() > 0){
+           // $isPaid = $ck->first()->is_paid == 1 ? true : false;
+            $ck = $ck->get();
+            $cats = Cat::all();
+            $sck = $ck->first();
+            return view('Frontend.dbsavedcart',['user' => $user,'products' => $ck,'cats' => $cats,'checkout' => $sck]);
+        }else {
+            return redirect()->back()->with('error','Either the checkout does not exist, or it does not belong to you');
+
+        }
+        }
+    }
+
+    public function deleteproductsavedincart($id){
+        if(!is_numeric($id) || $id == null || empty($id)){
+            return redirect()->back()->with('error','Id must be provided.');
+        }else {
+            $user = Auth::user();
+            $order = Order::where(['id' => $id]);
+            if($order->count() > 0){
+                $order = $order->first();
+                $ck = CK::where(['id' => $order->checkout_id,'user_id' => $user->id]);
+                if($ck->count() > 0){
+                    $price = $order->total_ordered_product_price;
+                    $quantity = $order->quantity_ordered;
+                    if($order->delete()){
+                        $ck = $ck->first();
+                        $or = Order::where(['checkout_id' => $ck->id]);
+
+                        if($or->count() > 0){
+                        if($ck->total_price > 0){
+                        $ck->total_price = $ck->total_price - $price;
+                        $ck->products_quantity = $ck->products_quantity - $quantity;
+                        $ck->save();
+                        }
+                        }else {
+                            if($ck->delete()){
+                                return redirect('/user/myaccount')->with('success','Checkout deleted. Because it was the last product in the checkout.');
+                            }else {
+                            return redirect()->back()->with('info','Product deleted, but error occurred during deleting the checkout. Delete the checkout manually.');
+                            }
+                        }
+
+
+                        return redirect()->back()->with('success','Product deleted from the cart.');
+
+                    }else {
+                        return redirect()->back()->with('error','Error occurred in deleting the product from cart. Try again.');
+                    }
+                }else {
+                    return redirect()->back()->with('error',"The checkout's product does not belong to you.");
+                }
+            }else {
+            return redirect()->back()->with('error','No such product exists in the cart.');
+
+            }
+        }
+    }
+
+    public function deletesavedcheckout($id){
+        if(!is_numeric($id) || $id == null || empty($id)){
+            return redirect()->back()->with('error','Id must be provided.');
+        }else {
+            $user = Auth::user();
+            $ck = CK::where(['id' => $id,'user_id' => $user->id,'is_paid' => 0]);
+            if($ck->count() > 0){
+                $ck = $ck->first();
+                if($ck->delete()){
+                    return redirect()->back()->with('success','Checkout deleted.');
+
+                }else {
+                    return redirect()->back()->with('error','Error occurred in deleting the checkout. Try again.');
+
+                }
+            }else {
+            return redirect()->back()->with('error','No such checkout exists, or it does not belong to you.');
+
+            }
+        }
+    }
+
+
+    public function scheckout($id){
+
+        if(!is_numeric($id) || empty($id) || $id == null){
+            return redirect()->back()->with('error','Checkout must be provided to place order');
+        } else {
+        $cats = Cat::all();
+        $user = Auth::user();
+        $ck = CK::getSavedCheckout($id,$user->id);
+        if($ck->count() > 0){
+            $checkout = $ck->first();
+            $ck = $ck->get();
+        return view('Frontend.checkoutsaved',['checkout' => $checkout,'cats' => $cats, 'products' => $ck,'user' => $user]);
+
+        }else {
+            return redirect()->back()->with('error','No such checkout exists.');
+
+        }
+
+    }
+    }
+
+
+
+    public function placecheckoutorders(Request $req){
+
+
+        $fullname = $req->input('name');
+        $company = $req->input('company');
+        $address = $req->input('address');
+        $town = $req->input('citytown');
+        $postalcode = $req->input('postcode');
+        $email = $req->input('email');
+        $phone = $req->input('phone');
+        $checkout_id = $req->input('checkout_id');
+        if(empty($fullname) || empty($address) || empty($town) || empty($postalcode) || empty($email) || empty($phone) || !is_numeric($checkout_id) || empty($checkout_id)){
+            return redirect()->back()->with('error','None of the fields can be empty.');
+        }else {
+            $user = Auth::user();
+       $checkout = CK::Where(['id' => $checkout_id,'user_id' => $user->id]);
+
+       if($checkout->count() > 0){
+
+        $checkout = $checkout->first();
+        $checkout->firstname = $fullname;
+        $checkout->address = $address;
+        $checkout->town = $town;
+        $checkout->postalcode = $postalcode;
+        $checkout->email = $email;
+        $checkout->phonenumber = $phone;
+
+           if($checkout->save()){
+               return redirect('/user/payforcart/'.$checkout_id);
+           }else {
+            return redirect('/user/checkout')->with('error','Please try again.');
+
+           }
+
+    }else {
+        return redirect()->back()->with('error','The checkout does not exist or it does not belong to you.');
+    }
+}
+}
 
 
 

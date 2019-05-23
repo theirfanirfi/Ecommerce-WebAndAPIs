@@ -42,12 +42,27 @@ Route::group(['prefix' => 'user','middleware' => 'AuthWare'], function () {
     Route::get('addtowishlist/{id}','FrontendController@addtowishlist')->name('addtowishlist');
     Route::get('wishlist','FrontendController@wishlist')->name('wishlist');
     Route::get('removefromwishlist/{id}','FrontendController@removefromwishlist')->name('removefromwishlist');
+
     Route::get('checkout','FrontendController@checkout')->name('checkout');
+
+    Route::get('scheckout/{id}','FrontendController@scheckout')->name('scheckout');
+
     Route::post('placeorder','FrontendController@placeorder')->name('placeorder');
+    Route::post('placecheckoutorder','FrontendController@placecheckoutorders')->name('placecheckoutorder');
+
+
     Route::post('updateaccount','FrontendController@updateaccount')->name('updateaccount');
     Route::post('changepassword','FrontendController@changepassword')->name('changepassword');
 
     Route::get('account','FrontendController@myaccount')->name('account');
+
     Route::get('pay','PaymentController@pay')->name('pay');
-    Route::get('paid','PaymentController@getPaymentStatus')->name('paid ');
+    Route::get('payforcart/{id}','PaymentController@payforcart')->name('payforcart');
+
+    Route::get('paid','PaymentController@getPaymentStatus')->name('paid');
+    Route::get('paidforcart','PaymentController@getPaymentStatusForPaidCart')->name('paidforcart');
+
+    Route::get('savedcart/{id}','FrontendController@savedcart')->name('savedcart');
+    Route::get('deleteproductsavedincart/{id}','FrontendController@deleteproductsavedincart')->name('deleteproductsavedincart');
+    Route::get('deletesavedcheckout/{id}','FrontendController@deletesavedcheckout')->name('deletesavedcheckout');
 });

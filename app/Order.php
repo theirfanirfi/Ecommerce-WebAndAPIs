@@ -19,4 +19,10 @@ class Order extends Model
         ->leftjoin('order',['order.checkout_id' => 'checkout.id'])
         ->leftjoin('products',['products.product_id' => 'order.product_id']);
     }
+
+    public static function getSavedCheckoutWithOrder($id,$user_id){
+        return DB::table('checkout')->where(['checkout.id' => $id,'user_id' => $user_id,'is_paid' => 0])
+        ->leftjoin('order',['order.checkout_id' => 'checkout.id'])
+        ->leftjoin('products',['products.product_id' => 'order.product_id']);
+    }
 }

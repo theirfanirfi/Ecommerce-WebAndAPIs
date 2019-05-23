@@ -17,4 +17,11 @@ class Checkout extends Model
     public static function getCheckout($session_id,$user_id){
         return Checkout::where(['session_id' => $session_id,'user_id' => $user_id,'is_paid' => 0]);
     }
+
+    public static function getSavedCheckout($id,$user_id){
+        return DB::table('checkout')->where(['checkout.id' => $id,'user_id' => $user_id])
+        ->leftjoin('order',['order.checkout_id' => 'checkout.id'])
+        ->leftjoin('products',['products.product_id' => 'order.product_id'])
+        ->select('order.id as order_id','checkout.id as chk_id','order.*','checkout.*','products.*');
+    }
 }
