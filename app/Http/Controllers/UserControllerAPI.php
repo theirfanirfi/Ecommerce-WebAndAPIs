@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\User;
 use App\Http\MyClasses\CommonResponse as CR;
 use Illuminate\Support\Facades\Hash;
+use Auth;
 class UserControllerAPI extends Controller
 {
     //
@@ -16,20 +17,33 @@ class UserControllerAPI extends Controller
         if($email == "" || $password == ""){
            return CR::returnEmpty();
         }else {
-            $user = User::where(['email' => $email,'password' => $password]);
+
+            $user = User::where(['email' => $email]);
             if($user->count() > 0){
-                $user = $user->first();
-                $user->token = Hash::make($user->email.$user->created_at.time());
-                $user->save();
-            return response()->json([
-                'user' => $user->first(),
-                'isLoggedIn' => true,
-                'isError' => false,
-                'isAuthenticated' => true,
-            ]);
+
+                if(Auth::attempt(['email' => $email, 'password' => $password])){
+
+                    $user = $user->first();
+                    $user->token = Hash::make($user->email.$user->created_at.time());
+                    $user->save();
+
+                    return response()->json([
+                    'user' => $user->first(),
+                    'isLoggedIn' => true,
+                    'isError' => false,
+                    'isAuthenticated' => true,
+                    ]);
+
+
+                }else {
+                    return CR::invalidCreds();
+                }
+
             }else {
                 return CR::invalidCreds();
             }
+
+
         }
     }
 }

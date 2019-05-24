@@ -18,6 +18,7 @@ use URL;
 use App\Order;
 use App\Checkout as CK;
 use Auth;
+use Illuminate\Support\Facades\Hash;
 class PaymentController extends Controller
 {
     //
@@ -167,8 +168,9 @@ public function pay(){
     }
 
     public function check(){
-        $session_id = session()->getId();
-        echo $session_id;
+        // $session_id = session()->getId();
+        // echo $session_id;
+        echo Hash::make("irfan001");
     }
 
     public function payforcart($id){

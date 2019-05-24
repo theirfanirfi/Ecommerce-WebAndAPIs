@@ -238,7 +238,7 @@ class AdminControllerAPI extends Controller
     }
 
     public function getNewOrders(Request $req){
-        $ck = CK::where(['is_processed' => 0]);
+        $ck = CK::where(['is_processed' => 0,'is_paid' => 1]);
        // $checkouts = $ck->getNewOrders();
        if($ck->count() > 0){
         return response()->json([
@@ -258,7 +258,7 @@ class AdminControllerAPI extends Controller
 
 
     public function getOlderOrders(Request $req){
-        $ck = CK::where(['is_processed' => 1]);
+        $ck = CK::where(['is_processed' => 1,'is_paid' => 1]);
        // $checkouts = $ck->getNewOrders();
        if($ck->count() > 0){
         return response()->json([
