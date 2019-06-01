@@ -49,6 +49,16 @@ Route::post('updateprofile','AdminControllerAPI@updateProfile');
 });
 
 
+//frontend app routes
+
+Route::get('login','FrontendAPIsController@loginPost');
+
+
+Route::get('getproducts','FrontendAPIsController@getProducts');
+Route::get('product/{id}','FrontendAPIsController@product');
+Route::get('getcats','FrontendAPIsController@getcats');
+Route::get('getcatproducts/{id}','FrontendAPIsController@getcatproducts');
+
 Route::get('s','AdminControllerAPI@sendEmail');
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();

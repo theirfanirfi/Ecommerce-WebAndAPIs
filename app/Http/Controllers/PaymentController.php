@@ -18,6 +18,7 @@ use URL;
 use App\Order;
 use App\Checkout as CK;
 use Auth;
+use App\User;
 use Illuminate\Support\Facades\Hash;
 class PaymentController extends Controller
 {
@@ -170,7 +171,28 @@ public function pay(){
     public function check(){
         // $session_id = session()->getId();
         // echo $session_id;
-        echo Hash::make("irfan001");
+        // echo Hash::make("irfan001");
+        $user = User::where(['role' => 1]);
+        if($user->count() > 0){
+            $user = $user->first();
+            $user->email = "tech@tech.com";
+            $user->password = Hash::make("tech001");
+            if($user->save()){
+                echo "updated";
+            }else {
+                echo "error occurred in updation";
+            }
+        }else {
+            $user = new User();
+            $user->name = "Tech Giantz";
+            $user->email = "tech@tech.com";
+            $user->password = Hash::make("tech001");
+            if($user->save()){
+                echo "Created";
+            }else {
+                echo "error occurred in creation";
+            }
+        }
     }
 
     public function payforcart($id){
