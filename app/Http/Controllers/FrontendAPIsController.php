@@ -151,4 +151,145 @@ class FrontendAPIsController extends Controller
     }
     }
 
+    public function updateProfileDetails(Request $req){
+        $token = $req->input('token');
+        $name = $req->input('name');
+        $email = $req->input('email');
+
+        if(empty($name) || empty($email) || empty($token)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'None of the field can be empty.'
+             ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                $user->name = $name;
+
+                if($user->email !== $email){
+                    $checkEmail = User::where(['email' => $email])->count();
+                    if($checkEmail > 0){
+                        return response()->json([
+                            'isError' => true,
+                            'isLoggedIn' => true,
+                            'message' => 'The entered email cannot be assigned to you. It is already in use.'
+                         ]);
+                    }else {
+                        $user->email = $email;
+                    }
+                }
+
+
+                if($user->save()){
+                    return response()->json([
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isUpdated' => true,
+                        'user'=> $user,
+                        'message' => 'Details updated.'
+                     ]);
+                }else {
+                    return response()->json([
+                        'isError' => true,
+                        'isLoggedIn' => true,
+                        'message' => 'Error occurred in updating profile details. Please try again.'
+                     ]);
+                }
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'isLoggedIn' => false,
+                    'message' => 'Invalid credentials'
+                 ]);
+            }
+        }
+
+    }
+
+
+    public function getuser(Request $req){
+        $token = $req->input('token');
+
+        if($token == null || empty($token)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'User must be provided.'
+             ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                return response()->json([
+                    'isError' => false,
+                    'isLoggedIn' => true,
+                    'isFound' => true,
+                    'user' => $user,
+                    'message' => 'Found'
+                 ]);
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'isLoggedIn' => true,
+                    'isFound' => false,
+                    'message' => 'No user Found'
+                 ]);
+            }
+        }
+    }
+
+    public function changepass(Request $req){
+        $token = $req->input('token');
+        $cp = $req->input('cp');
+        $np = $req->input('np');
+
+        if($token == null || empty($token) || empty($cp) || empty($np)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'None of the fields can be empty.'
+             ]);
+        }else if(strlen($np) < 6) {
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'Password length must be at least six characters.'
+             ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                if(Hash::check($cp, $user->password)){
+                    $user->password = Hash::make($np);
+                    if($user->save()){
+                        return response()->json([
+                            'isError' => false,
+                            'isLoggedIn' => true,
+                            'isChanged' => true,
+                            'message' => 'Password Updated.'
+                         ]);
+                    }else {
+                        return response()->json([
+                            'isError' => true,
+                            'isLoggedIn' => true,
+                            'message' => 'Error occurred in updating the password. Please try again.'
+                         ]);
+                    }
+                }else {
+                    return response()->json([
+                        'isError' => true,
+                        'isLoggedIn' => true,
+                        'message' => 'Invalid current password'
+                     ]);
+                }
+
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'isLoggedIn' => true,
+                    'message' => 'No user Found'
+                 ]);
+            }
+        }
+    }
+
 }

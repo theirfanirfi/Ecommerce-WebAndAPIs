@@ -63,3 +63,10 @@ Route::get('s','AdminControllerAPI@sendEmail');
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
+
+//user app routes - login required
+Route::group(['prefix' => 'user','middleware' => 'UserAPIWare'], function () {
+Route::get('updateprofile','FrontendAPIsController@updateProfileDetails');
+Route::get('getuser','FrontendAPIsController@getuser');
+Route::get('changepass','FrontendAPIsController@changepass');
+});

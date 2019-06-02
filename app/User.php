@@ -67,4 +67,9 @@ class User extends Authenticatable
         return User::where(['token' => $token,'role' => 1])
         ->select('id','name','email','shipmentduration','password');
     }
+
+    public static function getUserByToken($token){
+        $user =  User::where(['token' => $token, 'role' => 0]);
+        return $user->count() > 0 ? $user->first() : false;
+    }
 }
