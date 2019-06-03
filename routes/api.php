@@ -69,4 +69,7 @@ Route::group(['prefix' => 'user','middleware' => 'UserAPIWare'], function () {
 Route::get('updateprofile','FrontendAPIsController@updateProfileDetails');
 Route::get('getuser','FrontendAPIsController@getuser');
 Route::get('changepass','FrontendAPIsController@changepass');
+
+Route::get('addtowishlist','FrontendAPIsController@addToWishList');
+Route::get('wishlist','FrontendAPIsController@getWishList');
 });

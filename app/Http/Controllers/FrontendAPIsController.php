@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Product;
 use App\User;
+use App\WhishList;
 use App\Category as Cat;
 use Auth;
 use Illuminate\Support\Facades\Hash;
@@ -287,6 +288,99 @@ class FrontendAPIsController extends Controller
                     'isError' => true,
                     'isLoggedIn' => true,
                     'message' => 'No user Found'
+                 ]);
+            }
+        }
+    }
+
+
+    public function getWishList(Request $req){
+        $token = $req->input('token');
+
+        if($token == null || empty($token)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'User must be provided.'
+             ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                $wl = WhishList::getWishListProducts($user->id);
+                if($wl->count() > 0){
+                    return response()->json([
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isFound' => true,
+                        'products' => $wl->get(),
+                        'message' => 'loading...'
+                     ]);
+                }else {
+                    return response()->json([
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isFound' => false,
+                        'message' => 'Your wishlist is empty.'
+                     ]);
+                }
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'isLoggedIn' => true,
+                    'message' => 'Invalid User.'
+                 ]);
+            }
+        }
+    }
+
+
+    public function addToWishList(Request $req){
+        $token = $req->input('token');
+        $product_id = $req->input('pid');
+
+        if($token == null || empty($token) || $product_id == null || empty($product_id) || !is_numeric($product_id)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'User must be provided.'
+             ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                $wlCheck = WhishList::where(['product_id' => $product_id,'user_id' => $user->id])->count();
+
+                if($wlCheck > 0){
+                    return response()->json([
+                        'isError' => true,
+                        'isLoggedIn' => true,
+                        'isAdded' => false,
+                        'message' => 'The product is already in your wish list.'
+                     ]);
+                }else {
+                $wl = new WhishList();
+                $wl->user_id = $user->id;
+                $wl->product_id = $product_id;
+                if($wl->save()){
+                    return response()->json([
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isAdded' => true,
+                        'message' => 'Product Added to your wish list.'
+                     ]);
+                }else {
+                    return response()->json([
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isAdded' => false,
+                        'message' => 'Error occurred in Adding the product to wishlist.'
+                     ]);
+                }
+            }
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'isLoggedIn' => true,
+                    'message' => 'Invalid User.'
                  ]);
             }
         }
