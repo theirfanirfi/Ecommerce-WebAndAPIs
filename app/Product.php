@@ -23,4 +23,11 @@ class Product extends Model
     public function getCat(){
         return Cat::find($this->cat_id)->cat_title;
     }
+
+    public static function getLoggedInUserProducts($user_id){
+        return DB::table('products')->leftjoin('categories',['products.cat_id' => 'categories.cat_id'])
+        ->leftjoin('wishlist',['wishlist.product_id' => 'products.product_id'])
+        ->select('wishlist.product_id','wishlist.user_id','products.product_id','product_name','product_image','products.cat_id','products.created_at','quantity','sold','available','cat_title','cat_title',
+        'product_price',DB::raw("IF (wishlist.user_id = '".$user_id."','true','false') as isFav"));
+    }
 }

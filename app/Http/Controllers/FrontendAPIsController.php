@@ -32,6 +32,35 @@ class FrontendAPIsController extends Controller
         }
     }
 
+    public function getLoggedInUserProducts(Request $req){
+        $token = $req->input('token');
+        $user= User::getUserByToken($token);
+        if($user){
+            $pro = Product::getLoggedInUserProducts($user->id);
+            if($pro->count() > 0){
+                return response()->json([
+                   'isError' => false,
+                   'isFound' => true,
+                   'proudcts' => $pro->get(),
+                   'message' => 'Loading'
+                ]);
+            }else {
+                return response()->json([
+                    'isError' => false,
+                    'isFound' => false,
+                    'message' => 'No products found'
+                 ]);
+            }
+        }else {
+            return response()->json([
+                'isError' => true,
+                'isFound' => false,
+                'message' => 'You are not logged in to perform this action.'
+             ]);
+        }
+
+    }
+
     public function product($id){
         if(!is_numeric($id) || empty($id)){
             return response()->json([
@@ -347,24 +376,129 @@ class FrontendAPIsController extends Controller
         }else {
             $user= User::getUserByToken($token);
             if($user){
-                $wlCheck = WhishList::where(['product_id' => $product_id,'user_id' => $user->id])->count();
+                $wlCheck = WhishList::where(['product_id' => $product_id,'user_id' => $user->id]);
 
-                if($wlCheck > 0){
-                    return response()->json([
-                        'isError' => true,
-                        'isLoggedIn' => true,
-                        'isAdded' => false,
-                        'message' => 'The product is already in your wish list.'
-                     ]);
+                if($wlCheck->count() > 0){
+                    if($wlCheck->first()->delete()){
+                        $wl = WhishList::getWishListProducts($user->id)->get();
+                        return response()->json([
+                            'isError' => false,
+                            'isLoggedIn' => true,
+                            'isDeleted' => true,
+                            'products' => $wl,
+                            'message' => 'The product is removed from your wishlist.'
+                         ]);
+                    }else {
+                        return response()->json([
+                            'isError' => true,
+                            'isLoggedIn' => true,
+                            'isDeleted' => false,
+                            'message' => 'Error occurred in removing the product from your wishlist. Please try again.'
+                         ]);
+                    }
+
                 }else {
                 $wl = new WhishList();
                 $wl->user_id = $user->id;
                 $wl->product_id = $product_id;
                 if($wl->save()){
+                    $wl = WhishList::getWishListProducts($user->id)->get();
                     return response()->json([
+
                         'isError' => false,
                         'isLoggedIn' => true,
                         'isAdded' => true,
+                        'products' => $wl,
+                        'message' => 'Product Added to your wish list.'
+                     ]);
+                }else {
+                    return response()->json([
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isAdded' => false,
+                        'message' => 'Error occurred in Adding the product to wishlist.'
+                     ]);
+                }
+            }
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'isLoggedIn' => true,
+                    'message' => 'Invalid User.'
+                 ]);
+            }
+        }
+    }
+
+    public function returnCart(Request $req){
+        $cart = $req->input('ct');
+        $cart = base64_decode($cart);
+        $cart = json_decode($cart);
+        $products = Product::whereIn('product_id',$cart);
+        if($products->count() > 0){
+            return response()->json([
+               'isError' => false,
+               'isFound' => true,
+               'proudcts' => $products->get(),
+               'message' => 'Loading'
+            ]);
+        }else {
+            return response()->json([
+                'isError' => false,
+                'isFound' => false,
+                'message' => 'No products found'
+             ]);
+        }
+    }
+
+
+    public function addToWishListProductsTab(Request $req){
+        $token = $req->input('token');
+        $product_id = $req->input('pid');
+
+        if($token == null || empty($token) || $product_id == null || empty($product_id) || !is_numeric($product_id)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => true,
+                'message' => 'User must be provided.'
+             ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                $wlCheck = WhishList::where(['product_id' => $product_id,'user_id' => $user->id]);
+
+                if($wlCheck->count() > 0){
+                    if($wlCheck->first()->delete()){
+                        $products = Product::getLoggedInUserProducts($user->id)->get();
+                        return response()->json([
+                            'isError' => false,
+                            'isLoggedIn' => true,
+                            'isDeleted' => true,
+                            'products' => $products,
+                            'message' => 'The product is removed from your wishlist.'
+                         ]);
+                    }else {
+                        return response()->json([
+                            'isError' => true,
+                            'isLoggedIn' => true,
+                            'isDeleted' => false,
+                            'message' => 'Error occurred in removing the product from your wishlist. Please try again.'
+                         ]);
+                    }
+
+                }else {
+                $wl = new WhishList();
+                $wl->user_id = $user->id;
+                $wl->product_id = $product_id;
+                if($wl->save()){
+                    $products = Product::getLoggedInUserProducts($user->id)->get();
+
+                    return response()->json([
+
+                        'isError' => false,
+                        'isLoggedIn' => true,
+                        'isAdded' => true,
+                        'products' => $products,
                         'message' => 'Product Added to your wish list.'
                      ]);
                 }else {

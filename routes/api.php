@@ -67,9 +67,16 @@ Route::get('s','AdminControllerAPI@sendEmail');
 //user app routes - login required
 Route::group(['prefix' => 'user','middleware' => 'UserAPIWare'], function () {
 Route::get('updateprofile','FrontendAPIsController@updateProfileDetails');
+Route::get('getproducts','FrontendAPIsController@getLoggedInUserProducts');
+
 Route::get('getuser','FrontendAPIsController@getuser');
 Route::get('changepass','FrontendAPIsController@changepass');
 
 Route::get('addtowishlist','FrontendAPIsController@addToWishList');
+
+Route::get('addtowishlisttab','FrontendAPIsController@addToWishListProductsTab');
+
 Route::get('wishlist','FrontendAPIsController@getWishList');
+
+Route::get('cart','FrontendAPIsController@returnCart');
 });
