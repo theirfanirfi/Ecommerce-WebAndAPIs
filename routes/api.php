@@ -78,5 +78,6 @@ Route::get('addtowishlisttab','FrontendAPIsController@addToWishListProductsTab')
 
 Route::get('wishlist','FrontendAPIsController@getWishList');
 
-Route::get('cart','FrontendAPIsController@returnCart');
+Route::post('cart','FrontendAPIsController@returnCart');
+Route::get('paycart/{id}','PaymentController@paycart');
 });

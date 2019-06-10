@@ -7,6 +7,8 @@ use App\Product;
 use App\User;
 use App\WhishList;
 use App\Category as Cat;
+use App\Checkout as CK;
+use App\Order;
 use Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -431,9 +433,114 @@ class FrontendAPIsController extends Controller
     }
 
     public function returnCart(Request $req){
+
         $cart = $req->input('ct');
-        $cart = base64_decode($cart);
-        $cart = json_decode($cart);
+        $token = $req->input('token');
+        $name = $req->input('name');
+        $address = $req->input('address');
+        $company = $req->input('company');
+        $town = $req->input('town');
+        $postalcode = $req->input('postalcode');
+        $email = $req->input('email');
+        $phone = $req->input('phone');
+
+        if(empty($cart) || empty($token) || empty($name) || empty($address) || empty($company) || empty($town) || empty($postalcode) ||
+        empty($email) || empty($phone)){
+            return response()->json([
+                'isError' => true,
+                'message' => 'none of the fields can be empty'
+            ]);
+        }else {
+            $user= User::getUserByToken($token);
+            if($user){
+                $cart = base64_decode($cart);
+                $cart = json_decode($cart);
+                $ck = new CK();
+                $ck->firstname = $name;
+                $ck->address = $address;
+                $ck->email = $email;
+                $ck->phonenumber = $phone;
+                $ck->town = $town;
+                $ck->postalcode = $postalcode;
+                $ck->user_id = $user->id;
+                $ck->products_quantity = 0;
+                $ck->total_price = 0;
+                $ck->session_id = "Processed from mobile app";
+
+                if($ck->save()){
+                    $quantity = 0;
+                    $tprice = 0;
+                    $isDone = false;
+                    foreach($cart as $c){
+                        $p = Product::where(['product_id' => $c->product_id]);
+                        if($p->count() > 0){
+                            $p = $p->first();
+                            $quantity = $quantity + $c->quantity_ordered;
+                            $tprice = $tprice + $p->product_price * $c->quantity_ordered;
+                            $or = new Order();
+                            $or->checkout_id = $ck->id;
+                           // $or->user_id = $user->id;
+                            $or->product_id = $p->product_id;
+                            $or->product_price = $p->product_price;
+                            $or->quantity_ordered = $c->quantity_ordered;
+                            $or->total_ordered_product_price = $p->product_price * $c->quantity_ordered;
+
+                            if($or->save()){
+                                $isDone = true;
+                                continue;
+                            }else {
+                                $ck->delete();
+                                $isDone = false;
+                                return response()->json([
+                                    'isError' => true,
+                                    'message' => 'Error occurred in processing the checkout. Please try again.'
+                                ]);
+                            }
+                        }else {
+                            return response()->json([
+                                'isError' => true,
+                                'message' => 'Invalid product(s) supplied.'
+                            ]);
+                        }
+                    }
+
+                    if($isDone){
+                        $ck->products_quantity = $quantity;
+                        $ck->total_price = $tprice;
+                        if($ck->save()){
+                            return response()->json([
+                                'isError' => false,
+                                'message' => 'Proceed to payment.'
+                            ]);
+                        }else {
+                            return response()->json([
+                                'isError' => true,
+                                'message' => 'Not done.'
+                            ]);
+                        }
+                    }
+                }else {
+                    return response()->json([
+                        'isError' => true,
+                        'message' => 'Error occurred in processing the checkout. Please try again.'
+                    ]);
+                }
+
+            }else {
+                return response()->json([
+                    'isError' => true,
+                    'message' => 'Please login to checkout.'
+                ]);
+            }
+        }
+
+
+
+        return response()->json([
+            'ids' => $ids
+        ]);
+        //var_dump($ids);
+        exit();
         $products = Product::whereIn('product_id',$cart);
         if($products->count() > 0){
             return response()->json([
