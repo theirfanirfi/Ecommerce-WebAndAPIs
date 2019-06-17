@@ -52,6 +52,7 @@ Route::post('updateprofile','AdminControllerAPI@updateProfile');
 //frontend app routes
 
 Route::get('login','FrontendAPIsController@loginPost');
+Route::get('register','FrontendAPIsController@register');
 
 
 Route::get('getproducts','FrontendAPIsController@getProducts');
@@ -79,5 +80,12 @@ Route::get('addtowishlisttab','FrontendAPIsController@addToWishListProductsTab')
 Route::get('wishlist','FrontendAPIsController@getWishList');
 
 Route::post('cart','FrontendAPIsController@returnCart');
-Route::get('paycart/{id}','PaymentController@paycart');
+Route::get('paycart/{token}/{id}','PaymentController@payAPIforcart');
+});
+
+Route::group(['prefix' => 'man'],function(){
+    Route::get('cartpaid','PaymentController@getPaymentStatusForPaidCartAPI');
+    Route::get('/', function () {
+        echo "You have cancelled the payment method process. Please click the Done button in bar to get back into the app.";
+    });
 });

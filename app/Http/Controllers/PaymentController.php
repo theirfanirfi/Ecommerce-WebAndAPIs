@@ -336,11 +336,15 @@ class PaymentController extends Controller
 
 
 
-        public function payAPIforcart($id){
+        public function payAPIforcart($token,$id){
             if(!is_numeric($id) || empty($id) || $id == null){
-                return redirect('/user/account')->with('error','Checkout must be provided.');
-            }else {
-            $user = Auth::user();
+                echo 'Checkout must be provided.';
+            }else if(empty($token) || $token == null){
+                echo "You must be loggedin to perform this action.";
+            }
+            else {
+                $user= User::getUserByToken($token);
+                if($user){
             $orders = Order::getSavedCheckoutWithOrder($id,$user->id);
                 $ck = CK::where(['id' => $id,'user_id' => $user->id,'is_paid' => 0]);
                 if($orders->count() > 0 && $ck->count() > 0){
@@ -381,8 +385,8 @@ class PaymentController extends Controller
 
                   //redirect urls
               $redirect_urls = new RedirectUrls();
-              $redirect_urls->setReturnUrl(URL::to('/user/paidforcart')) /** Specify return URL **/
-                  ->setCancelUrl(URL::to('/'));
+              $redirect_urls->setReturnUrl(URL::to('/api/man/cartpaid?tk='.$token.'&ck='.$id)) /** Specify return URL **/
+                  ->setCancelUrl(URL::to('api/man/'));
 
                   //start the payment intent
               $payment = new Payment();
@@ -395,9 +399,9 @@ class PaymentController extends Controller
                 $payment->create($this->_api_context);
             } catch (\PayPal\Exception\PPConnectionException $ex) {
                 if (\Config::get('app.debug')) {
-                    return redirect('/')->with('error', 'Connection timeout');
+                    echo 'Connection timeout';
                 } else {
-                    return redirect('/')->with('error', 'Some error occur, sorry for inconvenience.');
+                    echo 'Some error occur, sorry for inconvenience.';
                 }
             }
             foreach ($payment->getLinks() as $link) {
@@ -409,17 +413,79 @@ class PaymentController extends Controller
             /** add payment ID to session **/
             session()->put('paypal_payment_id', $payment->getId());
             session()->put('checkout_id', $id);
+           // echo $id ." : ".$payment->getId();
+        //    echo session()->get('checkout_id');
+        //     exit();
             if (isset($redirect_url)) {
                 /** redirect to paypal **/
                 return redirect($redirect_url);
-            }
+            }else {
+                echo 'Unknown error occurred';
 
-            return redirect('/')->with('error', 'Unknown error occurred');
+            }
 
                 }else {
-                    return redirect('/')->with('error','No products found in your saved cart to be paid for.');
+                    echo 'No products found in your saved cart to be paid for.';
                 }
+            }else {
+                echo "You must be loggedin to perform this action";
+            }
+        }
             }
 
+
+            ////////api paid
+
+
+
+
+
+
+
+
+
+            public function getPaymentStatusForPaidCartAPI(Request $req)
+            {
+                /** Get the payment ID before session clear **/
+                $token = $req->input('tk');
+                //$payment_id = session()->get('paypal_payment_id');
+               // $checkout_id = session()->get('checkout_id');
+                $payment_id = $req->input('paymentId');
+                $checkout_id = $req->input('ck');
+               // exit();
+                $user= User::getUserByToken($token);
+                if($user){
+                $ck = CK::where(['id' => $checkout_id,'user_id' => $user->id,'is_paid' => 0])->first();
+                $payer_id = $req->get('PayerID');
+                if (empty($payer_id) || empty($req->get('token'))) {
+                    echo 'Payment failed';
+                }
+                $payment = Payment::get($payment_id, $this->_api_context);
+                $execution = new PaymentExecution();
+                $execution->setPayerId($req->get('PayerID'));
+                /**Execute the payment **/
+                $result = $payment->execute($execution, $this->_api_context);
+                if ($result->getState() == 'approved') {
+
+                    $ck->payer_id = $payer_id;
+                    $ck->payment_id = $payment_id;
+                    $ck->is_paid = 1;
+                    if($ck->save()){
+                        //session()->put('success', 'Payment success');
+                        session()->forget('paypal_payment_id');
+                        echo 'You have successfully paid for the products. You will shortly be contacted by the authorities.';
+                    }else {
+                        echo 'Payment payed, but error occurred in updating your record. please contact with the administrator and show them your Payment details \n
+                        Payment ID:'.$payment_id. '\n Payer Id: '.$payer_id;
+                    }
+
+                    // clear the session payment ID **/
+
+                }else {
+                echo 'Payment failed. Please try again';
+                }
+            }else {
+                echo "You must be loggedin to perform this action.";
+            }
             }
 }

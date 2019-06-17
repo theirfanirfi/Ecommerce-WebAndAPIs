@@ -627,4 +627,65 @@ class FrontendAPIsController extends Controller
         }
     }
 
+
+
+    public function register(Request $req){
+        $name = $req->input('name');
+        $email = $req->input('email');
+        $password = $req->input('password');
+        $confirmpassword = $req->input('cpass');
+        if(empty($password) || empty($email) || empty($confirmpassword) || empty($name)){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => false,
+                'message' => 'None of the field can be empty.'
+             ]);
+        }elseif ($password !== $confirmpassword) {
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => false,
+                'message' => 'Passwords mismatched.'
+             ]);
+        }
+        else {
+            $checkEmail = User::where(['email' => $email])->count();
+
+        if($checkEmail > 0){
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => false,
+                'message' => 'Error occurred. Please try again.'
+             ]);
+            }else {
+
+
+                 $user = new User();
+                 $user->name = $name;
+                 $user->email = $email;
+                 $user->role_name = "common";
+                 $user->role = 0;
+                 $user->password = Hash::make($password);
+
+                 $token = Hash::make(time().$user->id.$user->name.time()*4);
+                 $user->token = $token;
+                 if($user->save()){
+                     return response()->json([
+                         'isError' => false,
+                         'isLoggedIn' => true,
+                         'user' => $user,
+                         'message' => 'Registeration was successfull.'
+                      ]);
+
+
+
+        }else {
+            return response()->json([
+                'isError' => true,
+                'isLoggedIn' => false,
+                'message' => 'The email is already taken. Please use another one.'
+             ]);
+        }
+    }
+    }
+
 }
