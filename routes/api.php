@@ -81,6 +81,10 @@ Route::get('wishlist','FrontendAPIsController@getWishList');
 
 Route::post('cart','FrontendAPIsController@returnCart');
 Route::get('paycart/{token}/{id}','PaymentController@payAPIforcart');
+
+//unpaid checkouts.
+Route::get('unpaid','FrontendAPIsController@getUserUnPaidCheckouts');
+Route::get('unpaidpro','FrontendAPIsController@getUnPaidCheckoutProducts');
 });
 
 Route::group(['prefix' => 'man'],function(){

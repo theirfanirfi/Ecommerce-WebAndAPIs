@@ -697,4 +697,71 @@ class FrontendAPIsController extends Controller
     }
 
 }
+
+public function getUserUnPaidCheckouts(Request $req){
+    $token = $req->input('token');
+    $user= User::getUserByToken($token);
+    if($user){
+        $ck = CK::getUnPaidCheckoutsForAPIs($user->id);
+        if($ck->count() > 0){
+            return response()->json([
+               'isError' => false,
+               'isFound' => true,
+               'cks' => $ck->get(),
+               'message' => 'Loading'
+            ]);
+        }else {
+            return response()->json([
+                'isError' => false,
+                'isFound' => false,
+                'message' => 'No Unpaid checkout found'
+             ]);
+        }
+    }else {
+        return response()->json([
+            'isError' => true,
+            'isFound' => false,
+            'message' => 'You are not logged in to perform this action.'
+         ]);
+    }
+
+}
+
+public function getUnPaidCheckoutProducts(Request $req){
+    $token = $req->input('token');
+    $ckid = $req->input('ckid');
+    if(empty($token) || $token == null || empty($ckid) || $ckid == null || !is_numeric($ckid)){
+        return response()->json([
+            'isError' => true,
+            'isFound' => false,
+            'message' => 'Arguments must be provided.'
+         ]);
+    }else {
+    $user= User::getUserByToken($token);
+    if($user){
+        $ck = CK::getSavedCheckout($ckid,$user->id);
+        if($ck->count() > 0){
+            return response()->json([
+               'isError' => false,
+               'isFound' => true,
+               'products' => $ck->get(),
+               'message' => 'Loading'
+            ]);
+        }else {
+            return response()->json([
+                'isError' => false,
+                'isFound' => false,
+                'message' => 'No Products found in checkout'
+             ]);
+        }
+    }else {
+        return response()->json([
+            'isError' => true,
+            'isFound' => false,
+            'message' => 'You are not logged in to perform this action.'
+         ]);
+    }
+
+}
+}
 }

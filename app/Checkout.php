@@ -24,4 +24,8 @@ class Checkout extends Model
         ->leftjoin('products',['products.product_id' => 'order.product_id'])
         ->select('order.id as order_id','checkout.id as chk_id','order.*','checkout.*','products.*');
     }
+
+    public static function getUnPaidCheckoutsForAPIs($user_id){
+        return Checkout::where(['is_paid' => 0,'user_id' => $user_id]);
+    }
 }
