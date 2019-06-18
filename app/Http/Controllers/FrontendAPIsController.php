@@ -448,6 +448,7 @@ class FrontendAPIsController extends Controller
         empty($email) || empty($phone)){
             return response()->json([
                 'isError' => true,
+                'isCartSaved' => false,
                 'message' => 'none of the fields can be empty'
             ]);
         }else {
@@ -493,12 +494,14 @@ class FrontendAPIsController extends Controller
                                 $isDone = false;
                                 return response()->json([
                                     'isError' => true,
+                        'isCartSaved' => false,
                                     'message' => 'Error occurred in processing the checkout. Please try again.'
                                 ]);
                             }
                         }else {
                             return response()->json([
                                 'isError' => true,
+                        'isCartSaved' => false,
                                 'message' => 'Invalid product(s) supplied.'
                             ]);
                         }
@@ -510,11 +513,14 @@ class FrontendAPIsController extends Controller
                         if($ck->save()){
                             return response()->json([
                                 'isError' => false,
+                                'isCartSaved' => true,
+                                'ck' => $ck,
                                 'message' => 'Proceed to payment.'
                             ]);
                         }else {
                             return response()->json([
                                 'isError' => true,
+                                'isCartSaved' => false,
                                 'message' => 'Not done.'
                             ]);
                         }
@@ -522,6 +528,7 @@ class FrontendAPIsController extends Controller
                 }else {
                     return response()->json([
                         'isError' => true,
+                        'isCartSaved' => false,
                         'message' => 'Error occurred in processing the checkout. Please try again.'
                     ]);
                 }
@@ -529,6 +536,7 @@ class FrontendAPIsController extends Controller
             }else {
                 return response()->json([
                     'isError' => true,
+                    'isCartSaved' => false,
                     'message' => 'Please login to checkout.'
                 ]);
             }
@@ -637,13 +645,13 @@ class FrontendAPIsController extends Controller
         if(empty($password) || empty($email) || empty($confirmpassword) || empty($name)){
             return response()->json([
                 'isError' => true,
-                'isLoggedIn' => false,
+                'isRegistered' => false,
                 'message' => 'None of the field can be empty.'
              ]);
         }elseif ($password !== $confirmpassword) {
             return response()->json([
                 'isError' => true,
-                'isLoggedIn' => false,
+                'isRegistered' => false,
                 'message' => 'Passwords mismatched.'
              ]);
         }
@@ -653,8 +661,8 @@ class FrontendAPIsController extends Controller
         if($checkEmail > 0){
             return response()->json([
                 'isError' => true,
-                'isLoggedIn' => false,
-                'message' => 'Error occurred. Please try again.'
+                'isRegistered' => false,
+                'message' => 'Email is already taken. Please use another one.'
              ]);
             }else {
 
@@ -671,7 +679,7 @@ class FrontendAPIsController extends Controller
                  if($user->save()){
                      return response()->json([
                          'isError' => false,
-                         'isLoggedIn' => true,
+                         'isRegistered' => true,
                          'user' => $user,
                          'message' => 'Registeration was successfull.'
                       ]);
@@ -681,11 +689,12 @@ class FrontendAPIsController extends Controller
         }else {
             return response()->json([
                 'isError' => true,
-                'isLoggedIn' => false,
-                'message' => 'The email is already taken. Please use another one.'
+                'isRegistered' => false,
+                'message' => 'Error occurred during registeration. Please try again.'
              ]);
         }
     }
     }
 
+}
 }

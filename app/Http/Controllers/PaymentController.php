@@ -338,11 +338,14 @@ class PaymentController extends Controller
 
         public function payAPIforcart($token,$id){
             if(!is_numeric($id) || empty($id) || $id == null){
-                echo 'Checkout must be provided.';
+                echo '<h1>Checkout must be provided.</h1>';
             }else if(empty($token) || $token == null){
-                echo "You must be loggedin to perform this action.";
+                echo "<h1>You must be logged in to perform this action.</h1>";
             }
             else {
+                $token = base64_decode($token);
+                // echo $token;
+                // exit();
                 $user= User::getUserByToken($token);
                 if($user){
             $orders = Order::getSavedCheckoutWithOrder($id,$user->id);
@@ -399,9 +402,9 @@ class PaymentController extends Controller
                 $payment->create($this->_api_context);
             } catch (\PayPal\Exception\PPConnectionException $ex) {
                 if (\Config::get('app.debug')) {
-                    echo 'Connection timeout';
+                    echo '<h1>Connection timeout</h1>';
                 } else {
-                    echo 'Some error occur, sorry for inconvenience.';
+                    echo '<h1>Some error occur, sorry for inconvenience.</h1>';
                 }
             }
             foreach ($payment->getLinks() as $link) {
@@ -420,15 +423,15 @@ class PaymentController extends Controller
                 /** redirect to paypal **/
                 return redirect($redirect_url);
             }else {
-                echo 'Unknown error occurred';
+                echo '<h1>Unknown error occurred</h1>';
 
             }
 
                 }else {
-                    echo 'No products found in your saved cart to be paid for.';
+                    echo '<h1>No products found in your saved cart to be paid for.</h1>';
                 }
             }else {
-                echo "You must be loggedin to perform this action";
+                echo "<h1>You must be loggedin to perform this action</h1>";
             }
         }
             }
@@ -473,19 +476,20 @@ class PaymentController extends Controller
                     if($ck->save()){
                         //session()->put('success', 'Payment success');
                         session()->forget('paypal_payment_id');
-                        echo 'You have successfully paid for the products. You will shortly be contacted by the authorities.';
+                        echo '<h1>You have successfully paid for the products. You will shortly be contacted by the authorities.<h1>';
+                        echo '<h2>Payment details are: \n Payment ID:'.$payment_id. '\n Payer Id: '.$payer_id.'</h2>';
                     }else {
-                        echo 'Payment payed, but error occurred in updating your record. please contact with the administrator and show them your Payment details \n
-                        Payment ID:'.$payment_id. '\n Payer Id: '.$payer_id;
+                        echo '<h1>Payment payed, but error occurred in updating your record. please contact with the administrator and show them your Payment details \n
+                        Payment ID:'.$payment_id. '\n Payer Id: '.$payer_id.'</h1>';
                     }
 
                     // clear the session payment ID **/
 
                 }else {
-                echo 'Payment failed. Please try again';
+                echo '<h1>Payment failed. Please try again</h1>';
                 }
             }else {
-                echo "You must be loggedin to perform this action.";
+                echo "<h1>You must be loggedin to perform this action.</h1>";
             }
             }
 }
