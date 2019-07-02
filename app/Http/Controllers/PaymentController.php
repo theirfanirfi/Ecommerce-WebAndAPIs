@@ -16,6 +16,7 @@ use PayPal\Rest\ApiContext;
 use PayPal\Api\PaymentExecution;
 use URL;
 use App\Order;
+use App\Product; 
 use App\Checkout as CK;
 use Auth;
 use App\User;
@@ -154,6 +155,17 @@ class PaymentController extends Controller
             $ck->is_paid = 1;
             if($ck->save()){
                 //session()->put('success', 'Payment success');
+                $pros = Order::where(['checkout_id' => $ck->id]);
+                if($pros->count() > 0){
+                    $pros = $pros->get();
+                    
+                    foreach($pros as $p){
+                        $pr = Product::find($p->product_id);
+                        $pr->quantity = $pr->quantity - $p->quantity_ordered;
+                        $pr->save();
+                    }
+                }
+
                 session()->forget('paypal_payment_id');
                 session()->regenerate();
                 session()->forget(['cart','total_cart_cost']);

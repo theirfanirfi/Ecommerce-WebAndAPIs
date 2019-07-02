@@ -28,4 +28,9 @@ class Checkout extends Model
     public static function getUnPaidCheckoutsForAPIs($user_id){
         return Checkout::where(['is_paid' => 0,'user_id' => $user_id]);
     }
+
+
+    public static function getPaidCheckoutsForAPIs($user_id){
+        return Checkout::where(['is_paid' => 1,'user_id' => $user_id]);
+    }
 }

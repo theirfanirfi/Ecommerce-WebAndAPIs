@@ -126,8 +126,9 @@ class AdminControllerAPI extends Controller
         $quantity = $req->input('product_quantity');
         $price = $req->input('product_price');
         $cat_id = $req->input('cat_id');
+        $product_description = $req->input('desc');
 
-        if(empty($name) || empty($quantity) ||empty($cat_id)){
+        if(empty($name) || empty($quantity) ||empty($cat_id) || empty($product_description)){
             return response()->json([
                 'isAuthenticated' => true,
                 'isError' => true,
@@ -146,6 +147,7 @@ class AdminControllerAPI extends Controller
                     $product->quantity = $quantity;
                     $product->available = $quantity;
                     $product->sold = 0;
+                    $product->product_desc = $product_description;
                     $product->product_price = $price;
                     $product->cat_id = $cat_id;
                     $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
@@ -394,8 +396,9 @@ class AdminControllerAPI extends Controller
         $price = $req->input('product_price');
         $cat_id = $req->input('cat_id');
         $pid = $req->input('product_id');
+        $product_description = $req->input('desc');
 
-        if(empty($name) || empty($quantity) ||empty($cat_id) || empty($pid)){
+        if(empty($name) || empty($quantity) ||empty($cat_id) || empty($pid) || empty($product_description)){
             return response()->json([
                 'isAuthenticated' => true,
                 'isError' => true,
@@ -413,7 +416,7 @@ class AdminControllerAPI extends Controller
                     $product->product_name = $name;
                     $product->quantity = $product->available + $quantity;
                     $product->available = $product->available + $quantity;
-                  //  $product->sold = 0;
+                    $product->product_desc = $product_description;
                     $product->product_price = $price;
                     $product->cat_id = $cat_id;
                     $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
@@ -453,6 +456,7 @@ class AdminControllerAPI extends Controller
                 $product->quantity = $product->available + $quantity;
                 $product->available = $product->available + $quantity;
               //  $product->sold = 0;
+              $product->product_desc = $product_description;
                 $product->product_price = $price;
                 $product->cat_id = $cat_id;
                // $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;

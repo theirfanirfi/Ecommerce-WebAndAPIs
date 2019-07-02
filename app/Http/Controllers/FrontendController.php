@@ -89,6 +89,7 @@ class FrontendController extends Controller
     }
 
     public function singleproduct($id){
+        //$product = Pd::where(['product_id' => $id]);
         $product = Pd::where(['product_id' => $id]);
         if($product->count() > 0){
             $product = $product->first();

@@ -25,7 +25,7 @@
                     <div class="availability"><label>Availability:</label><span class="available">  in stock</span></div>
 
                     <div class="title"><a href="#">{{ $product->product_name }}</a></div>
-                    <div class="brand">sony</div>
+                    <div class="brand">{{$product->getCat()}}</div>
 
 
                     <div class="buttons-holder">
@@ -33,6 +33,7 @@
                     </div>
 
                     <div class="excerpt">
+                    {{$product->product_desc}}
                     </div>
 
                     <div class="prices">
