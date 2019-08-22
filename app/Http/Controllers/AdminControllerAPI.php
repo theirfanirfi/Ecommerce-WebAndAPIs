@@ -16,6 +16,7 @@ class AdminControllerAPI extends Controller
     //
 
     public function addCategory(Request $req){
+
         $title = $req->input('cat_title');
         if($title != ""){
         if($req->hasFile('image')){
@@ -681,6 +682,148 @@ class AdminControllerAPI extends Controller
          }else{
            return response()->success('Great! Successfully send in your mail');
          }
+    }
+
+    public function deleteCategory(Request $req){
+        $cat_id = $req->input('cid');
+
+        $cat = CAT::where(['cat_id' => $cat_id]);
+        if($cat->count() > 0){
+
+            if($cat->first()->delete()){
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isFound' => true,
+                    'isDeleted' => true,
+                    'message' => 'Category deleted.'
+                ]);
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => true,
+                    'isFound' => true,
+                    'isDeleted' => false,
+                    'message' => 'Error occurred in deleting the category. Try again.'
+                ]);
+            }
+
+
+        }else {
+            return response()->json([
+                'isAuthenticated' => true,
+                'isError' => true,
+                'isFound' => false,
+                'message' => "No such Category exists in the system."
+            ]);
+        }
+    }
+
+    public function getCategory(Request $req){
+            $cat_id = $req->input('cat_id');
+            $cat = Cat::where(['cat_id' => $cat_id]);
+            if($cat->count() > 0){
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isFound' => true,
+                    'cat' => $cat->first()
+                ]);
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => true,
+                    'isFound' => false,
+                    'message' => "No such Category exists in the system."
+                ]);
+            }
+    }
+
+
+    public function editcat(Request $req){
+
+        $cat_id = $req->input('cat_id');
+        $title = $req->input('cat_title');
+        if($title != "" && $cat_id != "" && !is_numeric($cat_id) || empty($cat_id)){
+            $c = CAT::where(['cat_id' => $cat_id]);
+            if($c->count() > 0 ){
+                $cat = $c->first();
+        if($req->hasFile('image')){
+
+            $file = $req->file('image');
+            $image_name = $file->getClientOriginalName();
+            $path = "./uploads/categories/";
+           // $cat = new Cat();
+            $cat->cat_title = $title;
+            $cat->cat_image = "http://192.168.10.4/Ecommerce/public/uploads/categories/".$title.time();
+            if($file->move($path,$image_name)){
+
+                if($cat->save()){
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => false,
+                        'isImageError' => false,
+                        'isSaved' => true,
+                        'isUploaded' => true,
+                        'message' => "Category Updated."
+                    ]);
+                }else {
+                    return response()->json([
+                        'isAuthenticated' => true,
+                        'isError' => false,
+                        'isImageError' => false,
+                        'isSaved' => false,
+                        'isUploaded' => true,
+                        'message' => "Image Uploaded but not saved. Try again."
+                    ]);
+                }
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => true,
+                    'isImageError' => true,
+                    'isSaved' => false,
+                    'isUploaded' => false,
+                    'message' => "Error occurred in uploading the category image"
+                ]);
+            }
+        }else {
+            $cat->cat_title = $title;
+            if($cat->save()){
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isImageError' => false,
+                    'isSaved' => true,
+                    'isUploaded' => true,
+                    'message' => "Category Updated."
+                ]);
+            }else {
+                return response()->json([
+                    'isAuthenticated' => true,
+                    'isError' => false,
+                    'isImageError' => false,
+                    'isSaved' => false,
+                    'isUploaded' => true,
+                    'message' => "Image Uploaded but not saved. Try again."
+                ]);
+            }
+        }
+    }else {
+        return response()->json([
+            'isAuthenticated' => true,
+            'isError' => true,
+            'isImageError' => true,
+            'message' => "No such category exists."
+        ]);
+    }
+    }else {
+        return response()->json([
+            'isAuthenticated' => true,
+            'isError' => true,
+            'message' => "Category title must be provided."
+        ]);
+    }
     }
 
 

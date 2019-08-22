@@ -26,6 +26,10 @@ Route::group(['prefix' => 'auth','middleware' => 'APIAdminWare'],function(){
 Route::post('/addcat','AdminControllerAPI@addCategory');
 
 Route::get('/getCategories','AdminControllerAPI@getCategories');
+Route::get('deletecategory','AdminControllerAPI@deleteCategory');
+Route::get('getcat','AdminControllerAPI@getCategory');
+Route::post('editcat','AdminControllerAPI@editcat');
+
 Route::get('/getproducts','AdminControllerAPI@getProducts');
 Route::get('/getproduct','AdminControllerAPI@getProduct');
 Route::get('/deleteproduct','AdminControllerAPI@deleteproduct');

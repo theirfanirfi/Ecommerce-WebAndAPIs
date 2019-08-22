@@ -16,7 +16,7 @@ use PayPal\Rest\ApiContext;
 use PayPal\Api\PaymentExecution;
 use URL;
 use App\Order;
-use App\Product; 
+use App\Product;
 use App\Checkout as CK;
 use Auth;
 use App\User;
@@ -88,8 +88,8 @@ class PaymentController extends Controller
 
             //redirect urls
         $redirect_urls = new RedirectUrls();
-        $redirect_urls->setReturnUrl(URL::to('paid')) /** Specify return URL **/
-            ->setCancelUrl(URL::to('paid'));
+        $redirect_urls->setReturnUrl(URL::to('user/paid')) /** Specify return URL **/
+            ->setCancelUrl(URL::to('user/paid'));
 
             //start the payment intent
         $payment = new Payment();
@@ -158,7 +158,7 @@ class PaymentController extends Controller
                 $pros = Order::where(['checkout_id' => $ck->id]);
                 if($pros->count() > 0){
                     $pros = $pros->get();
-                    
+
                     foreach($pros as $p){
                         $pr = Product::find($p->product_id);
                         $pr->quantity = $pr->quantity - $p->quantity_ordered;
