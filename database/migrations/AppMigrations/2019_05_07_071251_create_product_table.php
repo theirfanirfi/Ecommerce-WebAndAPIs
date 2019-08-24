@@ -25,7 +25,7 @@ class CreateProductTable extends Migration
             $table->integer('discount');
             $table->integer('available');
             $table->timestamps();
-            $table->foreign('cat_id')->references('cat_id')->on('categories');
+            $table->foreign('cat_id')->references('cat_id')->on('categories')->onDelete('cascade');
         });
     }
 

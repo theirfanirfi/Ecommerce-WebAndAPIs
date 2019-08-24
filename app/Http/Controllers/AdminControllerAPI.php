@@ -21,11 +21,13 @@ class AdminControllerAPI extends Controller
         if($title != ""){
         if($req->hasFile('image')){
             $file = $req->file('image');
-            $image_name = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            //$image_name = $file->getClientOriginalName();
+            $image_name = time().rand(0,10000).".".$extension;
             $path = "./uploads/categories/";
             $cat = new Cat();
             $cat->cat_title = $title;
-            $cat->cat_image = "http://192.168.10.4/Ecommerce/public/uploads/categories/".$title.time();
+            $cat->cat_image = "http://techgiantz.com/Ecommerce/public/uploads/categories/".$image_name;
             if($file->move($path,$image_name)){
 
                 if($cat->save()){
@@ -151,7 +153,7 @@ class AdminControllerAPI extends Controller
                     $product->product_desc = $product_description;
                     $product->product_price = $price;
                     $product->cat_id = $cat_id;
-                    $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
+                    $product->product_image = "http://techgiantz.com/Ecommerce/public/uploads/products/".$product_image_name;
 
                     if($product->save()){
                         return response()->json([
@@ -420,7 +422,7 @@ class AdminControllerAPI extends Controller
                     $product->product_desc = $product_description;
                     $product->product_price = $price;
                     $product->cat_id = $cat_id;
-                    $product->product_image = "http://192.168.10.4/Ecommerce/public/uploads/products/".$product_image_name;
+                    $product->product_image = "http://techgiantz.com/Ecommerce/public/uploads/products/".$product_image_name;
 
                     if($product->save()){
                         return response()->json([
@@ -744,18 +746,20 @@ class AdminControllerAPI extends Controller
 
         $cat_id = $req->input('cat_id');
         $title = $req->input('cat_title');
-        if($title != "" && $cat_id != "" && !is_numeric($cat_id) || empty($cat_id)){
+        if($title != "" && $cat_id != "" && is_numeric($cat_id) || empty($cat_id)){
             $c = CAT::where(['cat_id' => $cat_id]);
             if($c->count() > 0 ){
                 $cat = $c->first();
         if($req->hasFile('image')){
 
             $file = $req->file('image');
-            $image_name = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            //$image_name = $file->getClientOriginalName();
+            $image_name = time().rand(0,10000).".".$extension;
             $path = "./uploads/categories/";
            // $cat = new Cat();
             $cat->cat_title = $title;
-            $cat->cat_image = "http://192.168.10.4/Ecommerce/public/uploads/categories/".$title.time();
+            $cat->cat_image = "http://techgiantz.com/Ecommerce/public/uploads/categories/".$image_name;
             if($file->move($path,$image_name)){
 
                 if($cat->save()){
